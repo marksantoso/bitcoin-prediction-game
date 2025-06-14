@@ -1,0 +1,18 @@
+.cardHeader .cardHeader {
+	padding: var(--space-4);
+	border-bottom: var(--border-1) solid var(--color-border);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+
+.h1 {
+	font-size: var(--text-lg);
+	font-weight: var(--font-bold);
+}
+
+.h2 {
+	font-size: var(--text-base);
+	font-weight: var(--font-normal);
+}

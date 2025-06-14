@@ -1,0 +1,72 @@
+/* Loading Styles */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.loadingCard {
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.loadingContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.loadingText {
+  font-size: var(--text-xl);
+  color: var(--color-text-secondary);
+}
+
+.loadingIcon {
+  animation: spin 2s linear infinite;
+  width: var(--space-8);
+  height: var(--space-8);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-8);
+  padding-left: 0;
+  padding-right: 0;
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.chartContainer {
+  width: 100%;
+  min-width: 0; /* Prevent flex item from overflowing */
+  height: 100%;
+}
+
+.gameContainer {
+  width: 100%;
+  min-width: 0; /* Prevent flex item from overflowing */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+} 
+
+/* Responsive layout */
+@media (max-width: 1024px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}

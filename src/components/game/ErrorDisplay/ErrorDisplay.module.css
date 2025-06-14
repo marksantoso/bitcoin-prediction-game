@@ -1,0 +1,33 @@
+/* ErrorDisplay styles */
+.errorCard {
+  border-color: var(--color-error);
+  background-color: var(--color-background-primary);
+}
+
+.errorContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-6);
+}
+
+.errorText {
+  color: var(--color-error);
+}
+
+.retryButton.retryButton {
+  border: var(--border-1) solid var(--color-error);
+  background-color: transparent;
+  color: var(--color-error);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  min-width: unset;
+  text-transform: none;
+}
+
+.retryButton.retryButton:hover {
+  background-color: var(--color-background-tertiary);
+  box-shadow: none;
+} 

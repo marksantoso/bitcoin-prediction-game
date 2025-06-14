@@ -1,0 +1,59 @@
+.card.card {
+  border-radius: var(--radius-lg);
+  transition: var(--transition-base);
+  box-shadow: var(--shadow-md);
+}
+
+/* Variants */
+.outlined {
+  background-color: transparent;
+  border: var(--border-2) solid var(--color-border);
+  box-shadow: none;
+}
+
+.elevated {
+  border: none;
+  box-shadow: var(--shadow-md);
+}
+
+/* Padding variants */
+.padding-none {
+  padding: 0;
+}
+
+.padding-small {
+  padding: var(--space-3);
+}
+
+.padding-medium {
+  padding: var(--space-6);
+}
+
+.padding-large {
+  padding: var(--space-8);
+}
+
+/* Interactive card styles */
+.card[role="button"] {
+  cursor: pointer;
+}
+
+.card[role="button"]:focus {
+  outline: var(--border-2) solid var(--color-primary);
+  outline-offset: var(--border-2);
+}
+
+.card[role="button"]:active {
+  transform: scale(0.98);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .padding-large {
+    padding: var(--space-6);
+  }
+  
+  .padding-medium {
+    padding: var(--space-4);
+  }
+} 

@@ -1,0 +1,104 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-none);
+  white-space: nowrap;
+  transition: var(--transition-base);
+  border: var(--border-1) solid transparent;
+  max-width: 100%;
+}
+
+/* Sizes */
+.small {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+  height: var(--space-6);
+}
+
+.medium {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  height: var(--space-8);
+}
+
+.large {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-base);
+  height: var(--space-10);
+}
+
+/* Variants */
+.default {
+  background-color: var(--color-background-tertiary);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.primary {
+  background-color: var(--color-primary);
+  color: var(--color-background-primary);
+}
+
+.secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-background-primary);
+}
+
+.success {
+  background-color: var(--color-success);
+  color: var(--color-background-primary);
+}
+
+.warning {
+  background-color: var(--color-warning);
+  color: var(--color-background-primary);
+}
+
+.error {
+  background-color: var(--color-error);
+  color: var(--color-background-primary);
+}
+
+/* States */
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:active:not(.disabled) {
+  transform: scale(0.95);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Icon */
+.icon {
+  display: flex;
+  align-items: center;
+  margin-right: var(--space-1);
+  font-size: 0.875em;
+}
+
+.small .icon {
+  margin-right: var(--space-1);
+  font-size: 0.75em;
+}
+
+.large .icon {
+  margin-right: var(--space-2);
+  font-size: 1em;
+}
+
+/* Label */
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}

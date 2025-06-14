@@ -1,0 +1,28 @@
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+  
+  default_tags {
+    tags = {
+      Project     = "bitcoin-price-guess"
+      Environment = var.environment
+      ManagedBy   = "terraform"
+    }
+  }
+}
+
+# Random string for unique resource naming
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+  upper   = false
+} 

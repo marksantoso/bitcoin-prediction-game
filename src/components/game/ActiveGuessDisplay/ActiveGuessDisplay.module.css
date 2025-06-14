@@ -1,0 +1,152 @@
+/* ActiveGuessDisplay styles */
+.activeGuessCard {
+  box-shadow: var(--shadow-bitcoin);
+  width: 100%;
+}
+
+.activeGuessHeader {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.activeGuessTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+}
+
+.clockIcon {
+  height: var(--space-6);
+  width: var(--space-6);
+  color: var(--color-text-primary);
+}
+
+.resolvingText {
+  font-size: var(--text-sm);
+  color: var(--color-warning);
+  font-weight: var(--font-medium);
+}
+
+.activeGuessContent {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) 0;
+  width: 100%;
+}
+
+.predictionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.predictionLabel {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-1);
+  font-weight: var(--font-medium);
+}
+
+.predictionChip {
+  font-weight: var(--font-semibold) !important;
+  box-shadow: var(--shadow-sm);
+  min-width: 150px;
+}
+
+.predictionChipDown {
+  background-color: var(--color-success);
+}
+
+.predictionChipUp {
+  background-color: var(--color-error);
+}
+
+.chipContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.chipIcon {
+  height: var(--space-4);
+  width: var(--space-4);
+}
+
+.timeRemaining {
+  text-align: right;
+  min-width: 120px;
+}
+
+.timeValue {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  background: var(--color-text-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.startingPrice {
+  font-size: var(--text-sm);
+  color: var(--color-background-primary);
+  font-weight: var(--font-medium);
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  background-color: var(--color-text-primary);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: var(--space-10);
+  display: flex;
+  align-items: center;
+}
+
+.progressBar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-background-primary);
+  opacity: 0.2;
+  transition: var(--transition-base);
+  will-change: width;
+}
+
+.progressBarUp {
+  background-color: var(--color-success);
+}
+
+.progressBarDown {
+  background-color: var(--color-error);
+}
+
+.startingPrice.completed {
+  animation: pulse 1s ease;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.waitingPriceChange {
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+}
+
+.progressText {
+  margin-left: var(--space-2);
+  position: relative;
+  z-index: 1;
+}

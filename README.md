@@ -72,17 +72,11 @@ git clone <repository-url>
 cd bitcoin
 ```
 
-### 2. Deploy AWS Infrastructure
+### 2. Deploy everything (Lambda packaging + AWS infrastructure)
 
 ```bash
-# Package Lambda functions
-./deploy-lambdas.sh
-
-# Deploy with Terraform
-cd terraform
-terraform init
-terraform plan
-terraform apply
+# Deploy everything (Lambda packaging + AWS infrastructure)
+./deploy.sh
 ```
 
 ### 3. Configure Frontend
@@ -99,22 +93,6 @@ NEXT_PUBLIC_API_BASE_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com
 ```bash
 yarn install
 yarn dev
-```
-
-## Environment Configuration
-
-### Development Mode
-For local development using Next.js API routes:
-```bash
-# .env.local (or leave undefined)
-# NEXT_PUBLIC_API_BASE_URL=
-```
-
-### Production Mode  
-For production using deployed AWS infrastructure:
-```bash
-# .env.local
-NEXT_PUBLIC_API_BASE_URL=https://fet7siatbf.execute-api.us-east-1.amazonaws.com/prod
 ```
 
 ## Deployed AWS Infrastructure
@@ -153,16 +131,6 @@ npm run dev
 ```
 
 Visit http://localhost:3000
-
-The app will use local Next.js API routes for development.
-
-### Testing with AWS
-To test against deployed AWS infrastructure during development:
-
-```bash
-echo "NEXT_PUBLIC_API_BASE_URL=https://fet7siatbf.execute-api.us-east-1.amazonaws.com/prod" > .env.local
-npm run dev
-```
 
 ## Infrastructure Management
 

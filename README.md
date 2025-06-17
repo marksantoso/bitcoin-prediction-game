@@ -2,7 +2,7 @@
 
 A simple web application where users can guess whether Bitcoin's price will go up or down after 60 seconds.
 
-🎮 **[Live Demo](https://bitcoin-prediction-game-ycvs.vercel.app/)**
+🎮 **[Live Demo](https://bitcoin-prediction-game.vercel.app/)**
 
 ## Features
 

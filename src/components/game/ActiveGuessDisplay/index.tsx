@@ -111,7 +111,6 @@ export default function ActiveGuessDisplay({
   const [progressWidth, setProgressWidth] = useState<number>(0)
   const [predictionStatus, setPredictionStatus] = useState<string | null>(null)
   const [isCompleted, setIsCompleted] = useState<boolean>(false)
-  const [isResolving, setIsResolving] = useState<boolean>(false)
   const timeRemainingRef = useRef<HTMLParagraphElement>(null)
   const hasStartedResolvingRef = useRef<boolean>(false)
   const resolveGuessMutation = useResolveGuess()
@@ -146,7 +145,6 @@ export default function ActiveGuessDisplay({
 
     if (remaining <= 0 && !activeGuess.resolved && !hasStartedResolvingRef.current && currentPrice && (currentPrice.price !== activeGuess.startPrice)) {
       hasStartedResolvingRef.current = true
-      setIsResolving(true)
       resolveGuessMutation.mutate({
         userId,
         guessId: activeGuess.id,
@@ -176,7 +174,6 @@ export default function ActiveGuessDisplay({
   }, [updateTimeDisplay, activeGuess?.expiresAt])
 
   useEffect(() => {
-    setIsResolving(false)
     hasStartedResolvingRef.current = false
   }, [activeGuess?.id])
 

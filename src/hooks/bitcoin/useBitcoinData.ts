@@ -145,8 +145,6 @@ export function useResolveGuess() {
       userId,
       guessId,
       currentPrice,
-      startPrice,
-      direction,
     }: {
       userId: string
       guessId: string

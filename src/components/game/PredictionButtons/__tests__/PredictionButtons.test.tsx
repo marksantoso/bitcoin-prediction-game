@@ -14,12 +14,24 @@ describe('PredictionButtons', () => {
     timestamp: Date.now()
   };
 
+  // Mock console.error for all tests
+  const originalConsoleError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+
+  afterAll(() => {
+    console.error = originalConsoleError;
+  });
+
   beforeEach(() => {
     // Reset mock implementation before each test
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: jest.fn(),
+      mutateAsync: jest.fn(),
       isPending: false
     });
+    // Clear console.error mock
+    (console.error as jest.Mock).mockClear();
   });
 
   afterEach(() => {
@@ -27,9 +39,9 @@ describe('PredictionButtons', () => {
   });
 
   it('calls makeGuess with UP direction when clicking up button', () => {
-    const mockMutate = jest.fn();
+    const mockMutateAsync = jest.fn();
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false
     });
 
@@ -43,7 +55,7 @@ describe('PredictionButtons', () => {
 
     fireEvent.click(screen.getByText('Price will go UP'));
 
-    expect(mockMutate).toHaveBeenCalledWith({
+    expect(mockMutateAsync).toHaveBeenCalledWith({
       userId: mockUserId,
       direction: 'up',
       currentPrice: mockCurrentPrice.price
@@ -51,9 +63,9 @@ describe('PredictionButtons', () => {
   });
 
   it('calls makeGuess with DOWN direction when clicking down button', () => {
-    const mockMutate = jest.fn();
+    const mockMutateAsync = jest.fn();
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false
     });
 
@@ -67,7 +79,7 @@ describe('PredictionButtons', () => {
 
     fireEvent.click(screen.getByText('Price will go DOWN'));
 
-    expect(mockMutate).toHaveBeenCalledWith({
+    expect(mockMutateAsync).toHaveBeenCalledWith({
       userId: mockUserId,
       direction: 'down',
       currentPrice: mockCurrentPrice.price
@@ -75,9 +87,9 @@ describe('PredictionButtons', () => {
   });
 
   it('does not call makeGuess when no userId is provided', () => {
-    const mockMutate = jest.fn();
+    const mockMutateAsync = jest.fn();
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false
     });
 
@@ -92,13 +104,13 @@ describe('PredictionButtons', () => {
     fireEvent.click(screen.getByText('Price will go UP'));
     fireEvent.click(screen.getByText('Price will go DOWN'));
 
-    expect(mockMutate).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('does not call makeGuess when no current price is provided', () => {
-    const mockMutate = jest.fn();
+    const mockMutateAsync = jest.fn();
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false
     });
 
@@ -113,13 +125,13 @@ describe('PredictionButtons', () => {
     fireEvent.click(screen.getByText('Price will go UP'));
     fireEvent.click(screen.getByText('Price will go DOWN'));
 
-    expect(mockMutate).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('does not call makeGuess while loading', () => {
-    const mockMutate = jest.fn();
+    const mockMutateAsync = jest.fn();
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false
     });
 
@@ -134,14 +146,14 @@ describe('PredictionButtons', () => {
     fireEvent.click(screen.getByText('Price will go UP'));
     fireEvent.click(screen.getByText('Price will go DOWN'));
 
-    expect(mockMutate).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   // Edge Cases
   it('handles rapid button clicks correctly', () => {
-    const mockMutate = jest.fn();
+    const mockMutateAsync = jest.fn();
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false
     });
 
@@ -161,13 +173,13 @@ describe('PredictionButtons', () => {
     });
 
     // Should only call mutate once per click
-    expect(mockMutate).toHaveBeenCalledTimes(5);
+    expect(mockMutateAsync).toHaveBeenCalledTimes(5);
   });
 
-  it('handles mutation errors gracefully', () => {
-    const mockMutate = jest.fn();
+  it('handles mutation errors gracefully', async () => {
+    const mockMutateAsync = jest.fn().mockRejectedValue(new Error('Network error'));
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false,
       error: new Error('Network error')
     });
@@ -180,20 +192,23 @@ describe('PredictionButtons', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Price will go UP'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Price will go UP'));
+    });
     
-    expect(mockMutate).toHaveBeenCalledTimes(1);
-    expect(mockMutate).toHaveBeenCalledWith({
+    expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+    expect(mockMutateAsync).toHaveBeenCalledWith({
       userId: mockUserId,
       direction: 'up',
       currentPrice: mockCurrentPrice.price
     });
+    expect(console.error).toHaveBeenCalledWith('Failed to make guess:', expect.any(Error));
   });
 
   it('handles extremely large price values', () => {
-    const mockMutate = jest.fn();
+    const mockMutateAsync = jest.fn();
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false
     });
 
@@ -211,7 +226,7 @@ describe('PredictionButtons', () => {
     );
 
     fireEvent.click(screen.getByText('Price will go UP'));
-    expect(mockMutate).toHaveBeenCalledWith({
+    expect(mockMutateAsync).toHaveBeenCalledWith({
       userId: mockUserId,
       direction: 'up',
       currentPrice: Number.MAX_SAFE_INTEGER
@@ -219,9 +234,9 @@ describe('PredictionButtons', () => {
   });
 
   it('handles concurrent pending states', () => {
-    const mockMutate = jest.fn();
+    const mockMutateAsync = jest.fn();
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: true
     });
 
@@ -242,9 +257,9 @@ describe('PredictionButtons', () => {
   });
 
   it('handles invalid userId format', () => {
-    const mockMutate = jest.fn();
+    const mockMutateAsync = jest.fn();
     (useMakeGuess as jest.Mock).mockReturnValue({
-      mutate: mockMutate,
+      mutateAsync: mockMutateAsync,
       isPending: false
     });
 
@@ -257,6 +272,6 @@ describe('PredictionButtons', () => {
     );
 
     fireEvent.click(screen.getByText('Price will go UP'));
-    expect(mockMutate).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 }); 

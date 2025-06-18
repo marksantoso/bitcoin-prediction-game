@@ -150,7 +150,7 @@ describe('PriceScoreGrid', () => {
 
     render(<PriceScoreGrid userId={mockUserId} />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
-    expect(screen.getByText('0')).toBeInTheDocument(); // Default score when loading
+    expect(screen.getByText('Fetching score...')).toBeInTheDocument();
   });
 
   it('handles null userId correctly', () => {

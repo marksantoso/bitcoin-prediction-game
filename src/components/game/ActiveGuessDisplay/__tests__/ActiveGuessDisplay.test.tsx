@@ -252,7 +252,9 @@ describe('ActiveGuessDisplay', () => {
     expect(mockMutate).toHaveBeenCalledWith({
       userId: mockUserId,
       guessId: exactExpiryGuess.id,
-      currentPrice: mockCurrentPrice.price
+      currentPrice: mockCurrentPrice.price,
+      startPrice: exactExpiryGuess.startPrice,
+      direction: exactExpiryGuess.direction,
     });
   });
 

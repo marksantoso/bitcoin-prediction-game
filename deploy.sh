@@ -42,7 +42,7 @@ package_lambda() {
         
         # Create temporary package directory
         mkdir -p temp-$function_name
-        cp $source_file temp-$function_name/index.js
+        cp $source_file temp-$function_name/make-guess.js
         cp config.js temp-$function_name/ # Include shared config
         
         # Create or copy package.json with dependencies
@@ -63,7 +63,7 @@ package_lambda() {
 }
 
 # Package make-guess function (special case - uses existing structure)
-if [ -f "lambda/index.js" ]; then
+if [ -f "lambda/make-guess.js" ]; then
     echo "Packaging make-guess Lambda function..."
     cd lambda
     npm install --production 2>/dev/null || echo "No package.json found for make-guess, using existing dependencies"

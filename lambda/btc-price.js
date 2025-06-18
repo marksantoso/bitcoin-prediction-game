@@ -15,39 +15,32 @@ let priceCache = {
   ttl: 15000 // 15 second TTL
 };
 
-function makeHttpRequest(url, timeout = 5000) {
-  return new Promise((resolve, reject) => {
-    const request = https.get(url, {
-      timeout: timeout,
+async function makeHttpRequest(url, timeout = 5000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
       headers: {
         'User-Agent': 'Bitcoin-Price-Lambda/1.0'
       }
-    }, (res) => {
-      let data = '';
-      
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          resolve(parsed);
-        } catch (error) {
-          reject(new Error(`Failed to parse JSON: ${error.message}`));
-        }
-      });
     });
-
-    request.on('timeout', () => {
-      request.destroy();
-      reject(new Error('Request timeout'));
-    });
-
-    request.on('error', (error) => {
-      reject(error);
-    });
-  });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout');
+    }
+    throw error;
+  }
 }
 
 // Try multiple APIs with fallback

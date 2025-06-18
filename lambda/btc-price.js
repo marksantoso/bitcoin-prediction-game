@@ -8,13 +8,6 @@ const API_ENDPOINTS = [
   'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
 ];
 
-// Simple in-memory cache (in production, use Redis or DynamoDB)
-let priceCache = {
-  data: null,
-  timestamp: 0,
-  ttl: 15000 // 15 second TTL
-};
-
 async function makeHttpRequest(url, timeout = 5000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -47,12 +40,6 @@ async function makeHttpRequest(url, timeout = 5000) {
 async function fetchBitcoinPriceWithFallback() {
   const errors = [];
 
-  // Check cache first
-  if (priceCache.data && (Date.now() - priceCache.timestamp) < priceCache.ttl) {
-    console.log('Returning cached Bitcoin price');
-    return priceCache.data;
-  }
-
   // Try Binance first (primary)
   try {
     console.log('Attempting to fetch from Binance...');
@@ -77,13 +64,6 @@ async function fetchBitcoinPriceWithFallback() {
       timestamp: Date.now(),
       currency: 'USD',
       source: 'binance'
-    };
-
-    // Cache the result
-    priceCache = {
-      data: result,
-      timestamp: Date.now(),
-      ttl: 15000
     };
 
     return result;
@@ -118,13 +98,6 @@ async function fetchBitcoinPriceWithFallback() {
       source: 'coinbase'
     };
 
-    // Cache the result
-    priceCache = {
-      data: result,
-      timestamp: Date.now(),
-      ttl: 15000
-    };
-
     return result;
   } catch (error) {
     console.log('Coinbase failed:', error.message);
@@ -154,27 +127,10 @@ async function fetchBitcoinPriceWithFallback() {
       source: 'coingecko'
     };
 
-    // Cache the result
-    priceCache = {
-      data: result,
-      timestamp: Date.now(),
-      ttl: 15000
-    };
-
     return result;
   } catch (error) {
     console.log('CoinGecko failed:', error.message);
     errors.push(`CoinGecko: ${error.message}`);
-  }
-
-  // If all APIs fail, try to return stale cache if available
-  if (priceCache.data && (Date.now() - priceCache.timestamp) < 300000) { // 5 minutes
-    console.log('All APIs failed, returning stale cache');
-    return {
-      ...priceCache.data,
-      stale: true,
-      timestamp: Date.now()
-    };
   }
 
   // All options exhausted
@@ -205,7 +161,6 @@ exports.handler = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
-        'Cache-Control': 'max-age=30', // Client can cache for 30 seconds
         'X-API-Version': version,
         'X-API-Deprecated': versionConfig.DEPRECATED.toString()
       },

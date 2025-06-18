@@ -1,10 +1,11 @@
 const https = require('https');
+const { API_CONFIG } = require('./config');
 
 // Multiple API endpoints for fallback
 const API_ENDPOINTS = [
+  'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT',
   'https://api.coinbase.com/v2/exchange-rates?currency=BTC',
   'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true',
-  'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'
 ];
 
 // Simple in-memory cache (in production, use Redis or DynamoDB)
@@ -59,10 +60,49 @@ async function fetchBitcoinPriceWithFallback() {
     return priceCache.data;
   }
 
-  // Try Coinbase first (primary)
+  // Try Binance first (primary)
+  try {
+    console.log('Attempting to fetch from Binance...');
+    const response = await makeHttpRequest(API_ENDPOINTS[0]);
+    
+    console.log('Binance response:', JSON.stringify(response, null, 2));
+    
+    // Check if response has expected structure
+    if (!response || !response.price) {
+      throw new Error('Invalid response structure from Binance');
+    }
+    
+    const price = parseFloat(response.price);
+    
+    if (isNaN(price) || price <= 0) {
+      throw new Error('Invalid price value from Binance');
+    }
+    
+    const result = {
+      price: price,
+      change24h: 0, // Binance simple price API doesn't include 24h change
+      timestamp: Date.now(),
+      currency: 'USD',
+      source: 'binance'
+    };
+
+    // Cache the result
+    priceCache = {
+      data: result,
+      timestamp: Date.now(),
+      ttl: 15000
+    };
+
+    return result;
+  } catch (error) {
+    console.log('Binance failed:', error.message);
+    errors.push(`Binance: ${error.message}`);
+  }
+
+  // Try Coinbase as first fallback
   try {
     console.log('Attempting to fetch from Coinbase...');
-    const response = await makeHttpRequest(API_ENDPOINTS[0]);
+    const response = await makeHttpRequest(API_ENDPOINTS[1]);
     
     console.log('Coinbase response:', JSON.stringify(response, null, 2));
     
@@ -98,10 +138,10 @@ async function fetchBitcoinPriceWithFallback() {
     errors.push(`Coinbase: ${error.message}`);
   }
 
-  // Try CoinGecko as fallback
+  // Try CoinGecko as last resort
   try {
     console.log('Attempting to fetch from CoinGecko...');
-    const response = await makeHttpRequest(API_ENDPOINTS[1]);
+    const response = await makeHttpRequest(API_ENDPOINTS[2]);
     
     console.log('CoinGecko response:', JSON.stringify(response, null, 2));
     
@@ -134,34 +174,6 @@ async function fetchBitcoinPriceWithFallback() {
     errors.push(`CoinGecko: ${error.message}`);
   }
 
-  // Try Binance as last resort
-  try {
-    console.log('Attempting to fetch from Binance...');
-    const response = await makeHttpRequest(API_ENDPOINTS[2]);
-    
-    const price = parseFloat(response.price);
-    
-    const result = {
-      price: price,
-      change24h: 0, // Binance simple price API doesn't include 24h change
-      timestamp: Date.now(),
-      currency: 'USD',
-      source: 'binance'
-    };
-
-    // Cache the result
-    priceCache = {
-      data: result,
-      timestamp: Date.now(),
-      ttl: 15000
-    };
-
-    return result;
-  } catch (error) {
-    console.log('Binance failed:', error.message);
-    errors.push(`Binance: ${error.message}`);
-  }
-
   // If all APIs fail, try to return stale cache if available
   if (priceCache.data && (Date.now() - priceCache.timestamp) < 300000) { // 5 minutes
     console.log('All APIs failed, returning stale cache');
@@ -192,6 +204,8 @@ exports.handler = async (event) => {
 
   try {
     const priceData = await fetchBitcoinPriceWithFallback();
+    const version = API_CONFIG.CURRENT_VERSION;
+    const versionConfig = API_CONFIG.VERSIONS[version];
     
     return {
       statusCode: 200,
@@ -199,21 +213,23 @@ exports.handler = async (event) => {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
         'Cache-Control': 'max-age=30', // Client can cache for 30 seconds
-        'X-API-Version': 'v1',
-        'X-API-Deprecated': 'false'
+        'X-API-Version': version,
+        'X-API-Deprecated': versionConfig.DEPRECATED.toString()
       },
       body: JSON.stringify({
         ...priceData,
         _metadata: {
-          version: 'v1',
-          deprecated: false,
-          sunset_date: null
+          version: version,
+          deprecated: versionConfig.DEPRECATED,
+          sunset_date: versionConfig.SUNSET_DATE
         }
       })
     };
 
   } catch (error) {
     console.error('Error fetching Bitcoin price:', error);
+    const version = API_CONFIG.CURRENT_VERSION;
+    const versionConfig = API_CONFIG.VERSIONS[version];
     
     return {
       statusCode: 503, // Service Unavailable
@@ -221,17 +237,17 @@ exports.handler = async (event) => {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
         'Retry-After': '60', // Suggest client retry after 60 seconds
-        'X-API-Version': 'v1',
-        'X-API-Deprecated': 'false'
+        'X-API-Version': version,
+        'X-API-Deprecated': versionConfig.DEPRECATED.toString()
       },
       body: JSON.stringify({ 
         error: "Bitcoin price service temporarily unavailable",
         details: error.message,
         retryAfter: 60,
         _metadata: {
-          version: 'v1',
-          deprecated: false,
-          sunset_date: null
+          version: version,
+          deprecated: versionConfig.DEPRECATED,
+          sunset_date: versionConfig.SUNSET_DATE
         }
       })
     };

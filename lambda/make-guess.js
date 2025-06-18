@@ -25,6 +25,7 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body);
     const { userId, direction, currentPrice } = body;
 
+    // Validate required fields: userId, direction, and currentPrice must be present in the request body
     if (!userId || !direction || !currentPrice) {
       return {
         statusCode: 400,
@@ -59,10 +60,11 @@ exports.handler = async (event) => {
       console.error('Error checking existing guess:', error);
     }
 
+    // Generate a unique guess ID, set timestamps, and prepare the active guess object for storage.
     const guessId = Math.random().toString(36).substring(2, 15);
     const timestamp = Date.now();
-    const timeRemaining = GAME_CONFIG.guessResolutionTime; // 60 seconds
-    const expiresAt = Math.floor((timestamp + timeRemaining) / 1000); // TTL in seconds
+    const timeRemaining = GAME_CONFIG.guessResolutionTime; // Time (ms) before guess can be resolved
+    const expiresAt = Math.floor((timestamp + timeRemaining) / 1000); // DynamoDB TTL in seconds
 
     const activeGuess = {
       userId,
@@ -73,7 +75,7 @@ exports.handler = async (event) => {
       expiresAt
     };
 
-    // Store the active guess in DynamoDB
+    // Store the new active guess in the DynamoDB table
     const putCommand = new PutCommand({
       TableName: ACTIVE_GUESSES_TABLE,
       Item: activeGuess

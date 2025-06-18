@@ -16,6 +16,11 @@ A simple web application where users can guess whether Bitcoin's price will go u
 - ✅ TanStack Query for optimistic updates and real-time data
 - ✅ Serverless architecture with AWS Lambda
 
+## Assumptions
+
+- Production-level authentication is not implemented as this is a demonstration project
+- User ids are tracked through request fingerprinting (IP, user agent, language) for simplicity
+
 ## Tech Stack
 
 **Frontend:**

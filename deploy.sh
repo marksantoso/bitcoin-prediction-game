@@ -42,15 +42,12 @@ package_lambda() {
         
         # Create temporary package directory
         mkdir -p temp-$function_name
-        cp $source_file temp-$function_name/make-guess.js
+        cp $source_file temp-$function_name/index.js
         cp config.js temp-$function_name/ # Include shared config
         
         # Create or copy package.json with dependencies
-        if [ -f "package.json" ] && [ "$function_name" = "make-guess" ]; then
-            cp package.json temp-$function_name/
-        else
-            echo "$dependencies" > temp-$function_name/package.json
-        fi
+        echo "$dependencies" > temp-$function_name/package.json
+        
         
         cd temp-$function_name
         npm install --production 2>/dev/null || echo "No dependencies to install for $function_name"
@@ -66,9 +63,16 @@ package_lambda() {
 if [ -f "lambda/make-guess.js" ]; then
     echo "Packaging make-guess Lambda function..."
     cd lambda
+    # Create temporary directory for packaging
+    mkdir -p temp-make-guess
+    cp make-guess.js temp-make-guess/index.js
+    cp config.js temp-make-guess/
+    cp package.json temp-make-guess/
+    cd temp-make-guess
     npm install --production 2>/dev/null || echo "No package.json found for make-guess, using existing dependencies"
-    # Include config.js in the package
-    zip -r ../terraform/make-guess.zip . -x "*.git*" "node_modules/.bin/*" "temp-*" "build-lambdas.sh" 2>/dev/null
+    zip -r ../../terraform/make-guess.zip . -x "*.git*" "node_modules/.bin/*" 2>/dev/null
+    cd ..
+    rm -rf temp-make-guess
     cd ..
     echo "✓ make-guess packaged (includes config.js)"
 fi
@@ -122,4 +126,4 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Use the API Gateway URL above to test your endpoint."
 else
     echo "❌ Deployment cancelled."
-fi 
+fi

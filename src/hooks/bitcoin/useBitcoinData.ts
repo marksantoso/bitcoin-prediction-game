@@ -4,7 +4,7 @@ import { useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { bitcoinService } from '@/services/bitcoin'
 import { bitcoinWebSocketService } from '@/services/bitcoin/websocketService'
-import { IBitcoinPrice, IGuess, IUserScore } from '@/types/bitcoin.dto'
+import { IBitcoinPrice, IGuess } from '@/types/bitcoin.dto'
 import { GAME_CONFIG } from '@/config/game'
 import { queryKeys } from '@/lib/queryKeys'
 
@@ -29,7 +29,7 @@ export function useBitcoinPrice() {
     queryFn: async (): Promise<IBitcoinPrice> => {
       // Initial data fetch from REST API
       const response = await bitcoinService.getBitcoinPrice()
-      
+
       return {
         price: response.price,
         timestamp: Date.now(),
@@ -103,7 +103,7 @@ export function useMakeGuess() {
     },
     onSuccess: (data, variables) => {
       const { userId } = variables
-      
+
       // Optimistically update the active guess
       queryClient.setQueryData(
         queryKeys.bitcoin.activeGuess(userId),
@@ -115,7 +115,7 @@ export function useMakeGuess() {
           resolved: false,
         } as IGuess
       )
-      
+
       // Invalidate and refetch active guess to get server data
       queryClient.invalidateQueries({
         queryKey: queryKeys.bitcoin.activeGuess(userId),
@@ -123,7 +123,7 @@ export function useMakeGuess() {
     },
     onError: (error, variables) => {
       console.error('Failed to make guess:', error)
-      
+
       // Rollback optimistic update on error
       queryClient.invalidateQueries({
         queryKey: queryKeys.bitcoin.activeGuess(variables.userId),
@@ -134,9 +134,11 @@ export function useMakeGuess() {
   })
 }
 
-// Resolve guess mutation with enhanced error handling
+// Resolve guess mutation with enhanced error handling and retry logic
 export function useResolveGuess() {
   const queryClient = useQueryClient()
+  const MAX_RETRIES = 3
+  const RETRY_DELAY = 1000
 
   return useMutation({
     mutationFn: async ({
@@ -147,33 +149,35 @@ export function useResolveGuess() {
       userId: string
       guessId: string
       currentPrice: number
+      retryCount?: number
     }) => {
-      return await bitcoinService.resolveGuess(userId, guessId, currentPrice)
+      try {
+        const response = await bitcoinService.resolveGuess(userId, guessId, currentPrice)
+        return response
+      } catch (error: any) {
+        console.error('Failed to resolve guess:', error)
+        throw error
+      }
     },
     onSuccess: (data, variables) => {
       const { userId } = variables
-      
+
       // Optimistically update user score with the resolution result
-      if (data && (data.correct !== undefined || data.scoreChange !== undefined)) {
+      if (data) {
         queryClient.setQueryData(
           queryKeys.bitcoin.userScore(userId),
-          (oldScore: IUserScore | undefined) => {
-            if (!oldScore) return oldScore
-            
-            return {
-              ...oldScore,
-              score: data.newScore !== undefined ? data.newScore : oldScore.score + (data.scoreChange || 0),
-            }
-          }
+          () => ({
+            score: data.result.score
+          })
         )
       }
-      
+
       // Remove the active guess since it's now resolved
       queryClient.setQueryData(
         queryKeys.bitcoin.activeGuess(userId),
         null
       )
-      
+
       // Invalidate queries to get fresh server data
       queryClient.invalidateQueries({
         queryKey: queryKeys.bitcoin.activeGuess(userId),
@@ -182,17 +186,16 @@ export function useResolveGuess() {
         queryKey: queryKeys.bitcoin.userScore(userId),
       })
     },
-    onError: (error, variables) => {
+    onError: (error: any) => {
       console.error('Failed to resolve guess:', error)
-      
-      // Retry resolution after a short delay
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.bitcoin.activeGuess(variables.userId),
-        })
-      }, 2000)
     },
-    retry: 2,
-    retryDelay: 2000,
+    retry: (failureCount) => {
+      // Don't retry if we've hit the max retries or if it's not a 409
+      if (failureCount < MAX_RETRIES) {
+        return true
+      }
+      return false
+    },
+    retryDelay: RETRY_DELAY,
   })
 }

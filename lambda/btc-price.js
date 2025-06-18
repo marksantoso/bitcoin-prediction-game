@@ -1,4 +1,3 @@
-const https = require('https');
 const { API_CONFIG } = require('./config');
 
 // Multiple API endpoints for fallback

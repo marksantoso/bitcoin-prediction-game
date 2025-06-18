@@ -67,6 +67,13 @@ exports.handler = async (event) => {
     const resolvedTimestamp = Date.now();
     const duration = resolvedTimestamp - guess.timestamp;
     
+    // Initialize newScore outside try block
+    let newScore = {
+      userId,
+      score: score, // Default to just the current score if we can't get the previous score
+      updatedAt: new Date().toISOString()
+    };
+    
     // Update user score
     try {
       // Get current score
@@ -82,7 +89,7 @@ exports.handler = async (event) => {
       };
       
       // Update score - only track points
-      const newScore = {
+      newScore = {
         userId,
         score: currentScore.score + score,
         updatedAt: new Date().toISOString()
@@ -97,7 +104,7 @@ exports.handler = async (event) => {
       
     } catch (scoreError) {
       console.error('Error updating score:', scoreError);
-      // Continue even if score update fails
+      // Continue even if score update fails - we'll use the default newScore
     }
     
     // Remove from active guesses
@@ -118,7 +125,7 @@ exports.handler = async (event) => {
         success: true,
         result: {
           isCorrect,
-          score,
+          score: newScore.score,
           startPrice,
           endPrice: currentPrice,
           direction,

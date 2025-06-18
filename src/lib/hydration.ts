@@ -30,17 +30,13 @@ export async function prefetchUserData(queryClient: QueryClient, userId: string)
     // Prefetch user score
     await queryClient.prefetchQuery({
       queryKey: queryKeys.bitcoin.userScore(userId),
-      queryFn: async (): Promise<IUserScore> => {
+      queryFn: async (): Promise<IUserScore | null> => {
         try {
           const result = await bitcoinService.getUserScore(userId)
           return result
         } catch (error) {
           console.warn('⚠️ Server: User score prefetch failed, using default', error)
-          // Return default score if user doesn't exist yet
-          return {
-            userId,
-            score: 0,
-          }
+          return null
         }
       },
     })

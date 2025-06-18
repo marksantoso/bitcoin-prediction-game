@@ -6,7 +6,6 @@ import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import PriceScoreGrid from "@/components/game/PriceScoreGrid"
 import ActiveGuessDisplay from "@/components/game/ActiveGuessDisplay"
 import PredictionButtons from "@/components/game/PredictionButtons"
-import ErrorDisplay from "@/components/game/ErrorDisplay"
 import styles from "./GameContainer.module.css"
 
 export default function GameContainer({ userId }: { userId: string }) {
@@ -14,22 +13,17 @@ export default function GameContainer({ userId }: { userId: string }) {
   const {
     data: currentPrice,
     isLoading: isPriceLoading,
-    error: priceError
   } = useBitcoinPrice()
 
   const {
     data: activeGuess,
     isLoading: isGuessLoading,
-    error: guessError
   } = useActiveGuess(userId)
 
   const makeGuessMutation = useMakeGuess()
 
   // Combine all loading states
   const isLoading = isPriceLoading || isGuessLoading || makeGuessMutation.isPending
-
-  // Combine all errors
-  const error = priceError || guessError || makeGuessMutation.error
 
   // Show loading state if user ID is still being generated
   if ((isPriceLoading && !currentPrice)) {
@@ -92,10 +86,7 @@ export default function GameContainer({ userId }: { userId: string }) {
             isLoading={isLoading}
           />
         )}
-
-        <ErrorDisplay error={error} />
       </div>
-
     </div >
   )
 } 

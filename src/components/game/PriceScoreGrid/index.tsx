@@ -22,9 +22,11 @@ interface BitcoinPriceCardProps {
 
 interface UserScoreCardProps {
   userScore: IUserScore | undefined
+  isLoading: boolean
+  error: Error | null
 }
 
-function UserScoreCard({ userScore }: UserScoreCardProps) {
+function UserScoreCard({ userScore, isLoading, error }: UserScoreCardProps) {
   const scoreValue = useMemo(() => userScore?.score || 0, [userScore?.score])
   const scoreClass = useMemo(() => {
     return `${styles.scoreValue} ${scoreValue > 0 ? styles.scorePositive : styles.scoreNegative}`
@@ -42,14 +44,29 @@ function UserScoreCard({ userScore }: UserScoreCardProps) {
           </Box>
         </div>
 
-        <div>
-          <div className={scoreClass}>
-            {scoreValue}
+        {isLoading ? (
+          <div>
+            <div className={styles.loadingIndicator}>
+              <CircularProgress size={16} /> Fetching score...
+            </div>
           </div>
-          <div className={styles.loadingIndicator}>
-            {scoreValue === 1 ? 'Point' : 'Points'}
+        ) : error ? (
+          <div>
+            <div className={styles.scoreValue}>Error</div>
+            <div className={styles.loadingIndicator}>
+              Failed to load score data
+            </div>
           </div>
-        </div>
+        ) : (
+          <div>
+            <div className={scoreClass}>
+              {scoreValue}
+            </div>
+            <div className={styles.loadingIndicator}>
+              {scoreValue === 1 ? 'Point' : 'Points'}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
@@ -119,7 +136,7 @@ function BitcoinPriceCard({
 // Main component using subcomponents
 export default function PriceScoreGrid({ userId }: PriceScoreGridProps) {
   const { data: bitcoinPrice, isLoading: priceLoading, error: priceError } = useBitcoinPrice()
-  const { data: userScore } = useUserScore(userId || '')
+  const { data: userScore, isLoading: scoreLoading, error: scoreError } = useUserScore(userId || '')
   const { formatPrice } = useBitcoinUtils()
 
   return (
@@ -130,7 +147,11 @@ export default function PriceScoreGrid({ userId }: PriceScoreGridProps) {
         error={priceError}
         formatPrice={formatPrice}
       />
-      <MemoizedUserScoreCard userScore={userScore} />
+      <MemoizedUserScoreCard 
+        userScore={userScore} 
+        isLoading={scoreLoading}
+        error={scoreError}
+      />
     </div>
   )
 }

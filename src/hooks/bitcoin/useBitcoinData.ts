@@ -29,6 +29,7 @@ export function useBitcoinPrice() {
     queryFn: async (): Promise<IBitcoinPrice> => {
       // Initial data fetch from REST API
       const response = await bitcoinService.getBitcoinPrice()
+      
       return {
         price: response.price,
         timestamp: Date.now(),

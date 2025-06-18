@@ -19,6 +19,7 @@ interface PredictionButtonProps {
   isPending: boolean
   currentDirection: 'up' | 'down' | null
   disabled: boolean
+  error?: Error | null
 }
 
 function PredictionCardHeader() {
@@ -38,7 +39,8 @@ function PredictionButton({
   onClick,
   isPending,
   currentDirection,
-  disabled
+  disabled,
+  error
 }: PredictionButtonProps) {
   const Icon = direction === 'up' ? TrendingUp : TrendingDown
 
@@ -47,16 +49,19 @@ function PredictionButton({
   }
 
   const getButtonLabel = () => {
+    if (error && currentDirection === direction) {
+      return 'Failed - Click to retry'
+    }
     return `Price will go ${direction.toUpperCase()}`
   }
 
   const buttonClassNames = useMemo(getButtonClassNames, [direction])
-  const label = useMemo(getButtonLabel, [direction])
+  const label = useMemo(getButtonLabel, [direction, error])
 
   return (
     <Button
       onClick={() => onClick(direction)}
-      variant="primary"
+      variant={error && currentDirection === direction ? "error" : "primary"}
       loading={isPending && currentDirection === direction}
       disabled={disabled}
       className={buttonClassNames}
@@ -76,14 +81,20 @@ export default function PredictionButtons({
   const makeGuessMutation = useMakeGuess()
 
   const handleMakeGuess = useCallback(async (guessDirection: 'up' | 'down') => {
-    setDirection(guessDirection)
     if (!currentPrice?.price || !userId) return
 
-    makeGuessMutation.mutate({
-      userId,
-      direction: guessDirection,
-      currentPrice: currentPrice.price,
-    })
+    try {
+      setDirection(guessDirection)
+      await makeGuessMutation.mutateAsync({
+        userId,
+        direction: guessDirection,
+        currentPrice: currentPrice.price,
+      })
+    } catch (error) {
+      console.error('Failed to make guess:', error)
+      // Keep direction state to show error state on the button
+      // It will be reset when user clicks to retry
+    }
   }, [currentPrice?.price, userId, makeGuessMutation])
 
   function checkIsDisabled() {
@@ -104,6 +115,7 @@ export default function PredictionButtons({
             isPending={makeGuessMutation.isPending}
             currentDirection={direction}
             disabled={isDisabled}
+            error={makeGuessMutation.error}
           />
           <PredictionButton
             direction="down"
@@ -112,6 +124,7 @@ export default function PredictionButtons({
             isPending={makeGuessMutation.isPending}
             currentDirection={direction}
             disabled={isDisabled}
+            error={makeGuessMutation.error}
           />
         </div>
       </CardContent>

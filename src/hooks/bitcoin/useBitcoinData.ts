@@ -186,8 +186,11 @@ export function useResolveGuess() {
         queryKey: queryKeys.bitcoin.userScore(userId),
       })
     },
-    onError: (error: any) => {
+    onError: (error: any, variables) => {
       console.error('Failed to resolve guess:', error)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.bitcoin.activeGuess(variables.userId),
+      })
     },
     retry: (failureCount) => {
       // Don't retry if we've hit the max retries or if it's not a 409

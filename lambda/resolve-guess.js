@@ -58,6 +58,8 @@ exports.handler = async (event) => {
     const guess = guessResult.Item;
     const startPrice = guess.startPrice;
     const direction = guess.direction;
+    
+    // Determine if the user's guess was correct based on the direction and price movement
     const isCorrect = (direction === 'up' && currentPrice > startPrice) || 
                      (direction === 'down' && currentPrice < startPrice);
     

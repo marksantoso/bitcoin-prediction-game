@@ -73,7 +73,7 @@ bitcoin/
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/marksantoso/bitcoin-prediction-game.git
 cd bitcoin
 ```
 

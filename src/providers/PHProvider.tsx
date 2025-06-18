@@ -3,9 +3,9 @@
 
 import { usePathname, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
-
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider } from 'posthog-js/react'
+import { useDelayedSurvey } from '@/hooks/useDelayedSurvey'
 
 function PostHogPageView() {
   const pathname = usePathname()
@@ -28,6 +28,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       defaults: '2025-05-24',
     })
   }, [])
+
+  // Delay showing the survey
+  useDelayedSurvey();
 
   return (
     <PHProvider client={posthog}>

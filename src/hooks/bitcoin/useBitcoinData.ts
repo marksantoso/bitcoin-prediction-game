@@ -164,8 +164,6 @@ export function useResolveGuess() {
     onMutate: async (variables) => {
       const { userId, startPrice, currentPrice, direction } = variables
 
-      console.log('onMutate', variables)
-
       // Cancel any outgoing refetches to avoid overwriting our optimistic update
       await queryClient.cancelQueries({ queryKey: queryKeys.bitcoin.userScore(userId) })
       await queryClient.cancelQueries({ queryKey: queryKeys.bitcoin.activeGuess(userId) })

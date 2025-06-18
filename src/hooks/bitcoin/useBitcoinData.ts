@@ -145,11 +145,15 @@ export function useResolveGuess() {
       userId,
       guessId,
       currentPrice,
+      startPrice,
+      direction,
     }: {
       userId: string
       guessId: string
       currentPrice: number
       retryCount?: number
+      startPrice: number
+      direction: 'up' | 'down'
     }) => {
       try {
         const response = await bitcoinService.resolveGuess(userId, guessId, currentPrice)
@@ -159,24 +163,59 @@ export function useResolveGuess() {
         throw error
       }
     },
-    onSuccess: (data, variables) => {
-      const { userId } = variables
+    onMutate: async (variables) => {
+      const { userId, startPrice, currentPrice, direction } = variables
 
-      // Optimistically update user score with the resolution result
-      if (data) {
-        queryClient.setQueryData(
-          queryKeys.bitcoin.userScore(userId),
-          () => ({
-            score: data.result.score
-          })
-        )
-      }
+      console.log('onMutate', variables)
 
-      // Remove the active guess since it's now resolved
+      // Cancel any outgoing refetches to avoid overwriting our optimistic update
+      await queryClient.cancelQueries({ queryKey: queryKeys.bitcoin.userScore(userId) })
+      await queryClient.cancelQueries({ queryKey: queryKeys.bitcoin.activeGuess(userId) })
+
+      // Snapshot the previous values
+      const previousScore = queryClient.getQueryData(queryKeys.bitcoin.userScore(userId))
+      const previousGuess = queryClient.getQueryData(queryKeys.bitcoin.activeGuess(userId))
+
+      // Calculate if guess was correct
+      const priceWentUp = currentPrice > startPrice
+      const correctGuess = (direction === 'up' && priceWentUp) || (direction === 'down' && !priceWentUp)
+
+      // Optimistically update score
+      queryClient.setQueryData(
+        queryKeys.bitcoin.userScore(userId),
+        (old: any) => {
+          return {
+            score: (old?.score || 0) + (correctGuess ? 1 : -1)
+          }
+        }
+      )
+
+      // Clear active guess
       queryClient.setQueryData(
         queryKeys.bitcoin.activeGuess(userId),
         null
       )
+
+      // Return context with snapshot
+      return { previousScore, previousGuess }
+    },
+    onError: (error: any, variables, context) => {
+      console.error('Failed to resolve guess:', error)
+
+      // Rollback to previous values on error
+      if (context) {
+        queryClient.setQueryData(
+          queryKeys.bitcoin.userScore(variables.userId),
+          context.previousScore
+        )
+        queryClient.setQueryData(
+          queryKeys.bitcoin.activeGuess(variables.userId),
+          context.previousGuess
+        )
+      }
+    },
+    onSuccess: (data, variables) => {
+      const { userId } = variables
 
       // Invalidate queries to get fresh server data
       queryClient.invalidateQueries({
@@ -184,12 +223,6 @@ export function useResolveGuess() {
       })
       queryClient.invalidateQueries({
         queryKey: queryKeys.bitcoin.userScore(userId),
-      })
-    },
-    onError: (error: any, variables) => {
-      console.error('Failed to resolve guess:', error)
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.bitcoin.activeGuess(variables.userId),
       })
     },
     retry: (failureCount) => {

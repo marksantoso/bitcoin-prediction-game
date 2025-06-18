@@ -113,6 +113,7 @@ export default function ActiveGuessDisplay({
   const [isCompleted, setIsCompleted] = useState<boolean>(false)
   const [isResolving, setIsResolving] = useState<boolean>(false)
   const timeRemainingRef = useRef<HTMLParagraphElement>(null)
+  const hasStartedResolvingRef = useRef<boolean>(false)
   const resolveGuessMutation = useResolveGuess()
 
   const getPredictionStatus = useCallback(() => {
@@ -143,17 +144,20 @@ export default function ActiveGuessDisplay({
       timeRemainingRef.current.textContent = formatTime(remaining)
     }
 
-    if (remaining <= 0 && !activeGuess.resolved && !isResolving && currentPrice && (currentPrice.price !== activeGuess.startPrice)) {
+    if (remaining <= 0 && !activeGuess.resolved && !hasStartedResolvingRef.current && currentPrice && (currentPrice.price !== activeGuess.startPrice)) {
+      hasStartedResolvingRef.current = true
       setIsResolving(true)
       resolveGuessMutation.mutate({
         userId,
         guessId: activeGuess.id,
         currentPrice: currentPrice.price,
+        startPrice: activeGuess.startPrice,
+        direction: activeGuess.direction,
       })
       setPredictionStatus(null)
       setIsCompleted(true)
     }
-  }, [activeGuess, timeRemainingRef, formatTime, isResolving, currentPrice, resolveGuessMutation, userId])
+  }, [activeGuess, timeRemainingRef, formatTime, currentPrice, resolveGuessMutation, userId])
 
   useEffect(() => {
     if (!activeGuess?.expiresAt || !timeRemainingRef.current) {
@@ -173,6 +177,7 @@ export default function ActiveGuessDisplay({
 
   useEffect(() => {
     setIsResolving(false)
+    hasStartedResolvingRef.current = false
   }, [activeGuess?.id])
 
   useEffect(() => {

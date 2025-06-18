@@ -19,7 +19,7 @@ export const GAME_CONFIG = {
   pointsPerCorrectGuess: 1,
   
   // Points deducted for incorrect guesses
-  pointsPerIncorrectGuess: 0,
+  pointsPerIncorrectGuess: -1,
   
   // API Settings
   apiTimeout: 5000, // 5 seconds timeout for API calls

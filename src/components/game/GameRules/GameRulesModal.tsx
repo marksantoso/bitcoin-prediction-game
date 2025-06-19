@@ -1,6 +1,6 @@
 import { Modal, Box } from '@mui/material';
 import { Card, CardContent } from "@/ui"
-import { Clock, TrendingUp, TrendingDown, Trophy } from "lucide-react"
+import { Clock, TrendingUp, TrendingDown, Trophy, X } from "lucide-react"
 
 import styles from "./GameRules.module.css"
 
@@ -31,9 +31,17 @@ export default function GameRulesModal({ isOpen, onRequestClose }: GameRulesModa
         sx={{
           width: '100%',
           maxWidth: 600,
-          outline: 'none'
+          outline: 'none',
+          position: 'relative'
         }}
       >
+        <button 
+          onClick={onRequestClose}
+          className={styles.closeButton}
+          aria-label="Close modal"
+        >
+          <X size={24} />
+        </button>
         <Card className={styles.rulesCard}>
           <CardContent className={styles.rulesContent}>
             <h2 className={styles.rulesTitle}>How to Play</h2>

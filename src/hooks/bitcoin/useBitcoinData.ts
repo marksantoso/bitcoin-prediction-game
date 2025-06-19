@@ -213,7 +213,7 @@ export function useResolveGuess() {
 
       return { previousScore, previousGuess }
     },
-    onError: (error: any, variables, context) => {
+    onError: (error: any) => {
       console.error('Failed to resolve guess:', error)
     },
     onSuccess: (data, variables) => {

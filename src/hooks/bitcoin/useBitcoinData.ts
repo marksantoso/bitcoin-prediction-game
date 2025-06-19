@@ -76,9 +76,12 @@ export function useActiveGuess(userId: string) {
       return data ? 1000 * 5 : false // Every 5 seconds if active guess exists
     },
     retry: (failureCount, error) => {
-      // Don't retry 404s (no active guess)
+      // Don't retry 404s (no active guess) or if we've hit max retries
       if ((error as any)?.status === 404 || (error as any)?.response?.status === 404) return false
-      return failureCount < 2
+      if (failureCount < 2) {
+        return true
+      }
+      return false
     },
     retryDelay: 1000,
     throwOnError: false,
@@ -99,6 +102,12 @@ export function useMakeGuess() {
       direction: 'up' | 'down'
       currentPrice: number
     }) => {
+      // Check for existing active guess before making a new one
+      const activeGuess = await bitcoinService.getActiveGuess(userId)
+      if (activeGuess?.activeGuess) {
+        throw new Error('You already have an active guess')
+      }
+
       return await bitcoinService.makeGuess(userId, direction, currentPrice)
     },
     onSuccess: (data, variables) => {
@@ -122,7 +131,12 @@ export function useMakeGuess() {
       })
     },
     onError: (error, variables) => {
-      console.error('Failed to make guess:', error)
+      // Handle specific error cases
+      if (error instanceof Error && error.message === 'You already have an active guess') {
+        console.warn('Attempted to make a guess while another is active:', error)
+      } else {
+        console.error('Failed to make guess:', error)
+      }
 
       // Rollback optimistic update on error
       queryClient.invalidateQueries({
@@ -170,7 +184,12 @@ export function useResolveGuess() {
 
       // Snapshot the previous values
       const previousScore = queryClient.getQueryData(queryKeys.bitcoin.userScore(userId))
-      const previousGuess = queryClient.getQueryData(queryKeys.bitcoin.activeGuess(userId))
+      const previousGuess = queryClient.getQueryData<IGuess | null>(queryKeys.bitcoin.activeGuess(userId))
+
+      // If there's no active guess, don't proceed with optimistic update
+      if (!previousGuess) {
+        return { previousScore, previousGuess }
+      }
 
       // Calculate if guess was correct
       const priceWentUp = currentPrice > startPrice
@@ -181,7 +200,7 @@ export function useResolveGuess() {
         queryKeys.bitcoin.userScore(userId),
         (old: any) => {
           return {
-            score: (old?.score || 0) + (correctGuess ? 1 : -1)
+            score: (old?.score || 0) + (correctGuess ? GAME_CONFIG.correctGuessPoints : GAME_CONFIG.incorrectGuessPoints)
           }
         }
       )
@@ -192,23 +211,10 @@ export function useResolveGuess() {
         null
       )
 
-      // Return context with snapshot
       return { previousScore, previousGuess }
     },
     onError: (error: any, variables, context) => {
       console.error('Failed to resolve guess:', error)
-
-      // Rollback to previous values on error
-      if (context) {
-        queryClient.setQueryData(
-          queryKeys.bitcoin.userScore(variables.userId),
-          context.previousScore
-        )
-        queryClient.setQueryData(
-          queryKeys.bitcoin.activeGuess(variables.userId),
-          context.previousGuess
-        )
-      }
     },
     onSuccess: (data, variables) => {
       const { userId } = variables
@@ -221,8 +227,9 @@ export function useResolveGuess() {
         queryKey: queryKeys.bitcoin.userScore(userId),
       })
     },
-    retry: (failureCount) => {
-      // Don't retry if we've hit the max retries or if it's not a 409
+    retry: (failureCount, error) => {
+      // Don't retry 404s (no active guess) or if we've hit max retries
+      if ((error as any)?.status === 404 || (error as any)?.response?.status === 404) return false
       if (failureCount < MAX_RETRIES) {
         return true
       }

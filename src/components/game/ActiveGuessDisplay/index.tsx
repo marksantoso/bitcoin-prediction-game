@@ -115,7 +115,7 @@ export default function ActiveGuessDisplay({
   const hasStartedResolvingRef = useRef<boolean>(false)
   const resolveGuessMutation = useResolveGuess()
 
-  const getPredictionStatus = useCallback(() => {
+  const getPredictionStatus = () => {
     if (!currentPrice || (currentPrice.price === activeGuess.startPrice)) {
       setPredictionStatus(null)
       return
@@ -126,7 +126,7 @@ export default function ActiveGuessDisplay({
 
     // If prediction matches the price movement, it's correct
     setPredictionStatus(priceIsHigher === predictedUp ? "correct" : "incorrect")
-  }, [currentPrice, activeGuess.startPrice, activeGuess.direction])
+  }
 
   const updateTimeDisplay = useCallback(() => {
     if (!activeGuess?.expiresAt || !timeRemainingRef.current) return
@@ -155,7 +155,18 @@ export default function ActiveGuessDisplay({
       setPredictionStatus(null)
       setIsCompleted(true)
     }
-  }, [activeGuess, timeRemainingRef, formatTime, currentPrice, resolveGuessMutation, userId])
+  }, [
+    activeGuess,
+    currentPrice,
+    formatTime,
+    resolveGuessMutation,
+    setIsCompleted,
+    setPredictionStatus,
+    setProgressWidth,
+    setRemainingMs,
+    timeRemainingRef,
+    userId
+  ])
 
   useEffect(() => {
     if (!activeGuess?.expiresAt || !timeRemainingRef.current) {
@@ -179,7 +190,7 @@ export default function ActiveGuessDisplay({
 
   useEffect(() => {
     getPredictionStatus()
-  }, [getPredictionStatus])
+  }, [currentPrice, activeGuess.startPrice, activeGuess.direction])
 
   const showWaitingMessage = useMemo(() => {
     return (currentPrice?.price == activeGuess.startPrice) && (remainingMs == 0)

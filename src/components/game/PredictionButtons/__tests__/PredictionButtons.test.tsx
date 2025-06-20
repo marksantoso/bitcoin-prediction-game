@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, act } from '../../../../test-utils/setup';
-import PredictionButtons from '../index';
+import PredictionButtons from '../PredictionButtons';
 import { useMakeGuess } from '@/hooks/bitcoin/useBitcoinData';
 
 // Mock the hooks

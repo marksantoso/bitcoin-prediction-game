@@ -1,0 +1,15 @@
+/* Grid layout */
+.priceScoreGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .priceScoreGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+

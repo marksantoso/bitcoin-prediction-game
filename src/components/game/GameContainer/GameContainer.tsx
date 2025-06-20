@@ -3,9 +3,9 @@ import { Bitcoin } from "lucide-react"
 import { useBitcoinPrice, useActiveGuess, useMakeGuess } from "@/hooks/bitcoin/useBitcoinData"
 import { Card, CardContent } from "@/ui"
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
-import PriceScoreGrid from "@/components/game/PriceScoreGrid"
-import ActiveGuessDisplay from "@/components/game/ActiveGuessDisplay"
-import PredictionButtons from "@/components/game/PredictionButtons"
+import PriceScoreGrid from "@/components/game/PriceScore/PriceScoreGrid"
+import ActiveGuessDisplay from "@/components/game/ActiveGuess/ActiveGuess"
+import PredictionButtons from "@/components/game/PredictionButtons/PredictionButtons"
 import styles from "./GameContainer.module.css"
 
 export default function GameContainer({ userId }: { userId: string }) {

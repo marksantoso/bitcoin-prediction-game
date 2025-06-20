@@ -4,12 +4,6 @@
 }
 
 /* Header rules button */
-.rulesButtonContainer {
-  height: 100%;
-  display: flex;
-  justify-content: center;
-}
-
 .header .headerCard {
   margin-top: var(--space-8);
   margin-bottom: var(--space-8);

@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/ui"
 import { Bitcoin, TrendingUp } from "lucide-react"
 import styles from "./Header.module.css"
-import GameRules from "../GameRules"
+import GameRules from "../GameRules/GameRulesButton"
 
 export default function Header() {
   return (
@@ -28,9 +28,7 @@ export default function Header() {
             </p>
           </div>
 
-          <div className={styles.rulesButtonContainer}>
-            <GameRules />
-          </div>
+          <GameRules />
         </CardContent>
       </Card>
     </div>

@@ -1,0 +1,29 @@
+
+/* Card styles */
+.card {
+	height: fit-content;
+}
+
+.cardContent {
+	padding-top: 0;
+	position: relative;
+}
+
+.scorePositive {
+	color: var(--color-success);
+}
+
+.scoreNegative {
+	color: var(--color-error);
+}
+
+.loadingIndicator {
+	font-size: var(--text-sm);
+	color: var(--color-text-tertiary);
+	margin-top: var(--space-1);
+}
+
+.scoreValue {
+	font-size: var(--text-3xl);
+	font-weight: var(--font-bold);
+}

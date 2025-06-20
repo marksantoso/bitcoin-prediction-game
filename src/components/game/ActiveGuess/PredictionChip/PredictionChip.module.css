@@ -1,0 +1,24 @@
+.predictionChip {
+	font-weight: var(--font-semibold) !important;
+	box-shadow: var(--shadow-sm);
+	min-width: 150px;
+}
+
+.predictionChipDown {
+	background-color: var(--color-success);
+}
+
+.predictionChipUp {
+	background-color: var(--color-error);
+}
+
+.chipContent {
+	display: flex;
+	align-items: center;
+	gap: var(--space-1);
+}
+
+.chipIcon {
+	height: var(--space-4);
+	width: var(--space-4);
+}

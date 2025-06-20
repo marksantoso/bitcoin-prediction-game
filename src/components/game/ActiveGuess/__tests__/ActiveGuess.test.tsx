@@ -1,5 +1,5 @@
 import { render, screen, act } from '../../../../test-utils/setup';
-import ActiveGuessDisplay from '../index';
+import ActiveGuessDisplay from '../ActiveGuess';
 import { useResolveGuess } from '@/hooks/bitcoin/useBitcoinData';
 import { useBitcoinUtils } from '@/hooks/bitcoin/useBitcoinUtils';
 import { IGuess } from '@/types/bitcoin.dto';
@@ -13,7 +13,7 @@ jest.mock('@/hooks/bitcoin/useBitcoinUtils', () => ({
   useBitcoinUtils: jest.fn()
 }));
 
-describe('ActiveGuessDisplay', () => {
+describe('ActiveGuess', () => {
   const mockUserId = 'test-user-id';
   const mockActiveGuess: IGuess = {
     id: 'guess-id',

@@ -1,0 +1,44 @@
+.progressBar {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background-color: var(--color-background-primary);
+	opacity: 0.2;
+	transition: var(--transition-base);
+	will-change: width;
+}
+
+.progressBarUp {
+	background-color: var(--color-success);
+}
+
+.progressBarDown {
+	background-color: var(--color-error);
+}
+
+.startingPrice {
+	font-size: var(--text-sm);
+	color: var(--color-background-primary);
+	font-weight: var(--font-medium);
+	margin-top: var(--space-2);
+	padding: var(--space-2);
+	background-color: var(--color-text-primary);
+	border-radius: var(--radius-md);
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	min-height: var(--space-10);
+	display: flex;
+	align-items: center;
+}
+
+.startingPrice.completed {
+	animation: pulse 1s ease;
+}
+
+.progressText {
+	margin-left: var(--space-2);
+	position: relative;
+	z-index: 1;
+}

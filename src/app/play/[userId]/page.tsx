@@ -3,8 +3,8 @@ import { createQueryClient } from '@/lib/queryClient'
 import { prefetchGameData } from '@/lib/hydration'
 
 import { QueryProvider } from '@/providers/QueryProvider'
-import Header from '@/components/game/Header'
-import GameContainer from '@/components/game/GameContainer'
+import Header from '@/components/game/Header/Header'
+import GameContainer from '@/components/game/GameContainer/GameContainer'
 import styles from './page.module.css'
 
 interface Props {

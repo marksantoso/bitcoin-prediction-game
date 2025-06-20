@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Button } from "@/ui"
 import { HelpCircle } from "lucide-react"
-import GameRulesModal from './GameRulesModal'
-import styles from './GameRules.module.css'
+import GameRulesModal from './GameRulesModal/GameRulesModal'
+import styles from './GameRulesButton.module.css'
 
 export default function GameRules() {
   const [isModalOpen, setIsModalOpen] = useState(false)

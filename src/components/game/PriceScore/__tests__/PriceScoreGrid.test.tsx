@@ -1,5 +1,5 @@
 import { render, screen } from '../../../../test-utils/setup';
-import PriceScoreGrid from '../index';
+import PriceScoreGrid from '../PriceScoreGrid';
 import { useBitcoinPrice } from '@/hooks/bitcoin/useBitcoinData';
 import { useUserScore } from '@/hooks/bitcoin/useUserScore';
 import { useBitcoinUtils } from '@/hooks/bitcoin/useBitcoinUtils';

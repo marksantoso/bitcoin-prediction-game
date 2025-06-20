@@ -1,104 +1,18 @@
 "use client"
-
-import { useRef, useEffect, useState, useCallback, memo, useMemo } from "react"
-import { Chip, Card, CardHeader, CardContent } from '@/ui'
-import { TrendingUp, TrendingDown, Clock } from "lucide-react"
+import { useRef, useEffect, useState, useCallback, useMemo } from "react"
+import { Card, CardContent } from "@/ui"
 import { useBitcoinUtils } from "@/hooks/bitcoin/useBitcoinUtils"
 import { useResolveGuess } from "@/hooks/bitcoin/useBitcoinData"
 import { IGuess, IBitcoinPrice } from "@/types/bitcoin.dto"
-import styles from "./ActiveGuessDisplay.module.css"
+import GuessHeader from "./GuessHeader/GuessHeader"
+import PredictionChip from "./PredictionChip/PredictionChip"
+import ProgressBar from "./ProgressBar/ProgressBar"
+import styles from "./ActiveGuess.module.css"
 
 interface ActiveGuessDisplayProps {
   activeGuess: IGuess
   currentPrice: IBitcoinPrice | undefined
   userId: string
-}
-
-interface PredictionChipProps {
-  direction: 'up' | 'down'
-}
-
-interface ProgressBarProps {
-  progressWidth: number
-  startPrice: number
-  currentPrice: number | undefined
-  predictionStatus: string | null
-  isCompleted: boolean
-  formatPrice: (price: number) => string
-}
-
-interface HeaderProps {
-  isResolving: boolean
-}
-
-function PredictionChip({ direction }: PredictionChipProps) {
-  const Icon = direction === 'up' ? TrendingUp : TrendingDown
-
-  function getChipClassNames() {
-    return `${styles.predictionChip} ${direction === "up" ? styles.predictionChipDown : styles.predictionChipUp}`
-  }
-
-  const chipClassNames = useMemo(getChipClassNames, [direction])
-
-  return (
-    <Chip
-      label={
-        <span className={styles.chipContent}>
-          <Icon className={styles.chipIcon} />
-          Price will go {direction.toUpperCase()}
-        </span>
-      }
-      variant={direction === "up" ? "primary" : "secondary"}
-      className={chipClassNames}
-    />
-  )
-}
-
-const MemoizedPredictionChip = memo(PredictionChip)
-
-function GuessHeader({ isResolving }: HeaderProps) {
-  return (
-    <CardHeader
-      className={styles.activeGuessHeader}
-      title={
-        <div className={styles.activeGuessTitle}>
-          <Clock className={styles.clockIcon} />
-          Active Prediction
-          {isResolving && <span className={styles.resolvingText}>(Resolving...)</span>}
-        </div>
-      }
-    />
-  )
-}
-
-const MemoizedGuessHeader = memo(GuessHeader)
-
-function ProgressBar({
-  progressWidth,
-  startPrice,
-  currentPrice,
-  predictionStatus,
-  formatPrice
-}: ProgressBarProps) {
-  const barClassNames = useMemo(() => {
-    return `${styles.startingPrice} ${(currentPrice ?? 0) > startPrice ? styles.progressBarUp : ''} ${(currentPrice ?? 0) < startPrice ? styles.progressBarDown : ''} `
-  }, [currentPrice, startPrice])
-
-  const formattedPrice = useMemo(() => formatPrice(startPrice), [formatPrice, startPrice])
-
-  return (
-    <div className={barClassNames}>
-      <div
-        className={`${styles.progressBar}`}
-        style={{ width: `${100 - progressWidth}%` }}
-      />
-      {predictionStatus === null && <span>😐</span>}
-      {predictionStatus === "correct" && <span>😃</span>}
-      {predictionStatus === "incorrect" && <span>😥</span>}
-
-      <span className={styles.progressText}>Starting price: {formattedPrice}</span>
-    </div>
-  )
 }
 
 export default function ActiveGuessDisplay({
@@ -198,12 +112,12 @@ export default function ActiveGuessDisplay({
 
   return (
     <Card className={styles.activeGuessCard}>
-      <MemoizedGuessHeader isResolving={resolveGuessMutation.isPending} />
+      <GuessHeader isResolving={resolveGuessMutation.isPending} />
       <CardContent className={styles.activeGuessContent}>
         <div className={styles.predictionRow}>
           <div>
             <p className={styles.predictionLabel}>You predicted:</p>
-            <MemoizedPredictionChip direction={activeGuess.direction} />
+            <PredictionChip direction={activeGuess.direction} />
           </div>
           <div className={styles.timeRemaining}>
             <p className={styles.predictionLabel}>Time remaining:</p>

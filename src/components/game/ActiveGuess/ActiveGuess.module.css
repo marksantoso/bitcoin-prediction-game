@@ -1,0 +1,57 @@
+/* ActiveGuessDisplay styles */
+.activeGuessCard {
+  box-shadow: var(--shadow-bitcoin);
+  width: 100%;
+}
+
+.activeGuessContent {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) 0;
+  width: 100%;
+}
+
+.predictionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.predictionLabel {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-1);
+  font-weight: var(--font-medium);
+}
+
+.timeRemaining {
+  text-align: right;
+  min-width: 120px;
+}
+
+.timeValue {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  background: var(--color-text-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.waitingPriceChange {
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+}

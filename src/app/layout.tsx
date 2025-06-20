@@ -1,5 +1,5 @@
-import { Inter } from 'next/font/google'
 import './globals.css'
+import { Inter } from 'next/font/google'
 import type { Metadata } from 'next'
 import { PostHogProvider } from '../providers/PHProvider'
 import { Analytics } from "@vercel/analytics/next"

@@ -51,7 +51,7 @@ const BitcoinPriceCard = ({
                     </div>
                 ) : bitcoinPrice ? (
                     <div>
-                        <div className={styles.priceValue}>
+                        <div className={styles.priceValue} data-testid="current-price">
                             {formattedPrice}
                         </div>
                         <div className={styles.loadingIndicator}>

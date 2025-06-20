@@ -15,6 +15,7 @@ export default function GameRulesModal({ isOpen, onRequestClose }: GameRulesModa
 			open={isOpen}
 			onClose={onRequestClose}
 			aria-labelledby="game-rules-modal"
+			role="dialog"
 			sx={{
 				display: 'flex',
 				alignItems: 'center',

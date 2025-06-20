@@ -45,7 +45,7 @@ function UserScoreCard({ userScore, isLoading, error }: UserScoreCardProps) {
                     </div>
                 ) : (
                     <div>
-                        <div className={scoreClass}>
+                        <div className={scoreClass} data-testid="user-score">
                             {scoreValue}
                         </div>
                         <div className={styles.loadingIndicator}>

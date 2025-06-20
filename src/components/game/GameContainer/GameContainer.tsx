@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/ui"
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import PriceScoreGrid from "@/components/game/PriceScore/PriceScoreGrid"
 import ActiveGuessDisplay from "@/components/game/ActiveGuess/ActiveGuess"
-import PredictionButtons from "@/components/game/PredictionButtons/PredictionButtons"
+import PredictionCard from "@/components/game/PredictionCard/PredictionCard"
 import styles from "./GameContainer.module.css"
 
 export default function GameContainer({ userId }: { userId: string }) {
@@ -80,7 +80,7 @@ export default function GameContainer({ userId }: { userId: string }) {
         )}
 
         {!activeGuess && !isGuessLoading && (
-          <PredictionButtons
+          <PredictionCard
             currentPrice={currentPrice}
             userId={userId}
             isLoading={isLoading}

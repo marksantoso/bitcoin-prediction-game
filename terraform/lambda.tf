@@ -1,7 +1,7 @@
 # Lambda function for make-guess API
 resource "aws_lambda_function" "make_guess" {
   filename         = "make-guess.zip"
-  function_name    = "${var.project_name}-make-guess-${random_string.suffix.result}"
+  function_name    = "${var.project_name}-make-guess"
   role            = aws_iam_role.lambda_execution_role.arn
   handler         = "index.handler"
   runtime         = var.lambda_runtime
@@ -16,6 +16,7 @@ resource "aws_lambda_function" "make_guess" {
 
   tags = {
     Name = "${var.project_name}-make-guess"
+    Environment = var.environment
   }
 
   depends_on = [
@@ -28,7 +29,7 @@ resource "aws_lambda_function" "make_guess" {
 # Lambda function for active-guess API (GET)
 resource "aws_lambda_function" "active_guess" {
   filename         = "active-guess.zip"
-  function_name    = "${var.project_name}-active-guess-${random_string.suffix.result}"
+  function_name    = "${var.project_name}-active-guess"
   role            = aws_iam_role.lambda_execution_role.arn
   handler         = "index.handler"
   runtime         = var.lambda_runtime
@@ -43,6 +44,7 @@ resource "aws_lambda_function" "active_guess" {
 
   tags = {
     Name = "${var.project_name}-active-guess"
+    Environment = var.environment
   }
 
   depends_on = [
@@ -55,7 +57,7 @@ resource "aws_lambda_function" "active_guess" {
 # Lambda function for score API (GET)
 resource "aws_lambda_function" "score" {
   filename         = "score.zip"
-  function_name    = "${var.project_name}-score-${random_string.suffix.result}"
+  function_name    = "${var.project_name}-score"
   role            = aws_iam_role.lambda_execution_role.arn
   handler         = "index.handler"
   runtime         = var.lambda_runtime
@@ -70,6 +72,7 @@ resource "aws_lambda_function" "score" {
 
   tags = {
     Name = "${var.project_name}-score"
+    Environment = var.environment
   }
 
   depends_on = [
@@ -82,7 +85,7 @@ resource "aws_lambda_function" "score" {
 # Lambda function for btc-price API (GET)
 resource "aws_lambda_function" "btc_price" {
   filename         = "btc-price.zip"
-  function_name    = "${var.project_name}-btc-price-${random_string.suffix.result}"
+  function_name    = "${var.project_name}-btc-price"
   role            = aws_iam_role.lambda_execution_role.arn
   handler         = "index.handler"
   runtime         = var.lambda_runtime
@@ -91,6 +94,7 @@ resource "aws_lambda_function" "btc_price" {
 
   tags = {
     Name = "${var.project_name}-btc-price"
+    Environment = var.environment
   }
 
   depends_on = [
@@ -102,7 +106,7 @@ resource "aws_lambda_function" "btc_price" {
 # Lambda function for resolve-guess API (POST)
 resource "aws_lambda_function" "resolve_guess" {
   filename         = "resolve-guess.zip"
-  function_name    = "${var.project_name}-resolve-guess-${random_string.suffix.result}"
+  function_name    = "${var.project_name}-resolve-guess"
   role            = aws_iam_role.lambda_execution_role.arn
   handler         = "index.handler"
   runtime         = var.lambda_runtime
@@ -112,12 +116,13 @@ resource "aws_lambda_function" "resolve_guess" {
   environment {
     variables = {
       ACTIVE_GUESSES_TABLE = aws_dynamodb_table.active_guesses.name
-      USER_SCORES_TABLE    = aws_dynamodb_table.user_scores.name
+      USER_SCORES_TABLE = aws_dynamodb_table.user_scores.name
     }
   }
 
   tags = {
     Name = "${var.project_name}-resolve-guess"
+    Environment = var.environment
   }
 
   depends_on = [
@@ -129,53 +134,58 @@ resource "aws_lambda_function" "resolve_guess" {
 
 # CloudWatch Log Groups for Lambda functions
 resource "aws_cloudwatch_log_group" "make_guess_lambda_logs" {
-  name              = "/aws/lambda/${var.project_name}-make-guess-${random_string.suffix.result}"
+  name              = "/aws/lambda/${var.project_name}-make-guess"
   retention_in_days = 14
 
   tags = {
     Name = "${var.project_name}-make-guess-lambda-logs"
+    Environment = var.environment
   }
 }
 
 resource "aws_cloudwatch_log_group" "active_guess_lambda_logs" {
-  name              = "/aws/lambda/${var.project_name}-active-guess-${random_string.suffix.result}"
+  name              = "/aws/lambda/${var.project_name}-active-guess"
   retention_in_days = 14
 
   tags = {
     Name = "${var.project_name}-active-guess-lambda-logs"
+    Environment = var.environment
   }
 }
 
 resource "aws_cloudwatch_log_group" "score_lambda_logs" {
-  name              = "/aws/lambda/${var.project_name}-score-${random_string.suffix.result}"
+  name              = "/aws/lambda/${var.project_name}-score"
   retention_in_days = 14
 
   tags = {
     Name = "${var.project_name}-score-lambda-logs"
+    Environment = var.environment
   }
 }
 
 resource "aws_cloudwatch_log_group" "btc_price_lambda_logs" {
-  name              = "/aws/lambda/${var.project_name}-btc-price-${random_string.suffix.result}"
+  name              = "/aws/lambda/${var.project_name}-btc-price"
   retention_in_days = 14
 
   tags = {
     Name = "${var.project_name}-btc-price-lambda-logs"
+    Environment = var.environment
   }
 }
 
 resource "aws_cloudwatch_log_group" "resolve_guess_lambda_logs" {
-  name              = "/aws/lambda/${var.project_name}-resolve-guess-${random_string.suffix.result}"
+  name              = "/aws/lambda/${var.project_name}-resolve-guess"
   retention_in_days = 14
 
   tags = {
     Name = "${var.project_name}-resolve-guess-lambda-logs"
+    Environment = var.environment
   }
 }
 
 # API Gateway REST API
 resource "aws_api_gateway_rest_api" "bitcoin_api" {
-  name        = "${var.project_name}-api-${random_string.suffix.result}"
+  name        = "${var.project_name}-api"
   description = "Bitcoin Price Guess API"
 
   endpoint_configuration {
@@ -184,20 +194,14 @@ resource "aws_api_gateway_rest_api" "bitcoin_api" {
 
   tags = {
     Name = "${var.project_name}-api"
+    Environment = var.environment
   }
 }
 
-# API Gateway resource for /api
-resource "aws_api_gateway_resource" "api" {
-  rest_api_id = aws_api_gateway_rest_api.bitcoin_api.id
-  parent_id   = aws_api_gateway_rest_api.bitcoin_api.root_resource_id
-  path_part   = "api"
-}
-
-# API Gateway resource for /api/v1
+# API Gateway resource for /v1
 resource "aws_api_gateway_resource" "api_v1" {
   rest_api_id = aws_api_gateway_rest_api.bitcoin_api.id
-  parent_id   = aws_api_gateway_resource.api.id
+  parent_id   = aws_api_gateway_rest_api.bitcoin_api.root_resource_id
   path_part   = "v1"
 }
 
@@ -725,7 +729,7 @@ resource "aws_api_gateway_deployment" "bitcoin_api_deployment" {
 
   triggers = {
     redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.api.id,
+      aws_api_gateway_resource.api_v1.id,
       aws_api_gateway_resource.make_guess.id,
       aws_api_gateway_resource.active_guess.id,
       aws_api_gateway_resource.score.id,

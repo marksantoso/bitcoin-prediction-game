@@ -1,5 +1,5 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, GetCommand, PutCommand, DeleteCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, GetCommand, UpdateCommand, TransactWriteCommand } = require('@aws-sdk/lib-dynamodb');
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -14,8 +14,10 @@ exports.handler = async (event) => {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Requested-With',
+        'Access-Control-Allow-Methods': 'OPTIONS,GET,POST',
+        'Access-Control-Expose-Headers': '*',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ message: 'CORS preflight handled' })
     };
@@ -30,6 +32,9 @@ exports.handler = async (event) => {
         statusCode: 400,
         headers: {
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Requested-With',
+          'Access-Control-Allow-Methods': 'OPTIONS,GET,POST',
+          'Access-Control-Expose-Headers': '*',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ error: "Missing required data" })
@@ -49,6 +54,9 @@ exports.handler = async (event) => {
         statusCode: 404,
         headers: {
           'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Requested-With',
+          'Access-Control-Allow-Methods': 'OPTIONS,GET,POST',
+          'Access-Control-Expose-Headers': '*',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ error: "Active guess not found" })
@@ -59,80 +67,98 @@ exports.handler = async (event) => {
     const startPrice = guess.startPrice;
     const direction = guess.direction;
     
-    // Determine if the user's guess was correct based on the direction and price movement
+    // Determine if the user's guess was correct
     const isCorrect = (direction === 'up' && currentPrice > startPrice) || 
                      (direction === 'down' && currentPrice < startPrice);
     
     const score = isCorrect ? 1 : -1;
     const resolvedTimestamp = Date.now();
     const duration = resolvedTimestamp - guess.timestamp;
-    
-    // Initialize newScore outside try block
-    let newScore = {
-      userId,
-      score: score, // Default to just the current score if we can't get the previous score
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Update user score
+
     try {
-      // Get current score
-      const getScoreCommand = new GetCommand({
+      // Use a transaction to atomically update score and delete guess
+      const transactCommand = new TransactWriteCommand({
+        TransactItems: [
+          {
+            // Update the score atomically
+            Update: {
+              TableName: USER_SCORES_TABLE,
+              Key: { userId },
+              UpdateExpression: 'SET score = if_not_exists(score, :zero) + :scoreChange, updatedAt = :timestamp',
+              ExpressionAttributeValues: {
+                ':zero': 0,
+                ':scoreChange': score,
+                ':timestamp': new Date().toISOString()
+              },
+              // Create the item if it doesn't exist
+              ConditionExpression: 'attribute_not_exists(userId) OR attribute_exists(userId)'
+            }
+          },
+          {
+            // Delete the active guess with condition
+            Delete: {
+              TableName: ACTIVE_GUESSES_TABLE,
+              Key: { userId },
+              // Ensure we're deleting the correct guess
+              ConditionExpression: 'id = :guessId',
+              ExpressionAttributeValues: {
+                ':guessId': guessId
+              }
+            }
+          }
+        ]
+      });
+
+      await docClient.send(transactCommand);
+
+      // Get the updated score after the transaction
+      const getUpdatedScore = new GetCommand({
         TableName: USER_SCORES_TABLE,
         Key: { userId }
       });
       
-      const scoreResult = await docClient.send(getScoreCommand);
-      let currentScore = scoreResult.Item || {
-        userId,
-        score: 0
+      const updatedScoreResult = await docClient.send(getUpdatedScore);
+      const currentScore = updatedScoreResult.Item?.score || score;
+
+      return {
+        statusCode: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Requested-With',
+          'Access-Control-Allow-Methods': 'OPTIONS,GET,POST',
+          'Access-Control-Expose-Headers': '*',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          success: true,
+          result: {
+            isCorrect,
+            score: currentScore,
+            startPrice,
+            endPrice: currentPrice,
+            direction,
+            duration
+          }
+        })
       };
-      
-      // Update score - only track points
-      newScore = {
-        userId,
-        score: currentScore.score + score,
-        updatedAt: new Date().toISOString()
-      };
-      
-      const putScoreCommand = new PutCommand({
-        TableName: USER_SCORES_TABLE,
-        Item: newScore
-      });
-      
-      await docClient.send(putScoreCommand);
-      
-    } catch (scoreError) {
-      console.error('Error updating score:', scoreError);
-      // Continue even if score update fails - we'll use the default newScore
+
+    } catch (error) {
+      // Check if this was a condition failure
+      if (error.name === 'TransactionCanceledException') {
+        return {
+          statusCode: 409,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Requested-With',
+            'Access-Control-Allow-Methods': 'OPTIONS,GET,POST',
+            'Access-Control-Expose-Headers': '*',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ error: "Guess has already been resolved" })
+        };
+      }
+      throw error; // Re-throw other errors to be caught by outer catch block
     }
-    
-    // Remove from active guesses
-    const deleteCommand = new DeleteCommand({
-      TableName: ACTIVE_GUESSES_TABLE,
-      Key: { userId }
-    });
-    
-    await docClient.send(deleteCommand);
-    
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        success: true,
-        result: {
-          isCorrect,
-          score: newScore.score,
-          startPrice,
-          endPrice: currentPrice,
-          direction,
-          duration
-        }
-      })
-    };
 
   } catch (error) {
     console.error('Error resolving guess:', error);
@@ -141,6 +167,9 @@ exports.handler = async (event) => {
       statusCode: 500,
       headers: {
         'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Requested-With',
+        'Access-Control-Allow-Methods': 'OPTIONS,GET,POST',
+        'Access-Control-Expose-Headers': '*',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ error: "Failed to resolve guess" })

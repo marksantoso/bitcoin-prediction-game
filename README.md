@@ -90,7 +90,7 @@ Create `.env.local` file:
 
 ```bash
 # Use deployed AWS infrastructure
-NEXT_PUBLIC_API_BASE_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/prod
+NEXT_PUBLIC_API_BASE_URL=https://reth9yeru3.execute-api.us-east-1.amazonaws.com/prod
 ```
 
 ### 4. Run Frontend

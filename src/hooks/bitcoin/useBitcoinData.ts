@@ -158,15 +158,21 @@ export function useResolveGuess() {
     mutationFn: async ({
       userId,
       guessId,
-      currentPrice,
+      currentPrice
     }: {
       userId: string
       guessId: string
       currentPrice: number
-      retryCount?: number
       startPrice: number
       direction: 'up' | 'down'
     }) => {
+      // First check if guess is already resolved to prevent race conditions
+      const existingGuess = await bitcoinService.getActiveGuess(userId)
+      if (!existingGuess?.activeGuess || existingGuess.activeGuess.id !== guessId || existingGuess.activeGuess.resolved) {
+        console.log('Guess already resolved or no longer active, skipping resolution')
+        return null
+      }
+
       try {
         const response = await bitcoinService.resolveGuess(userId, guessId, currentPrice)
         return response

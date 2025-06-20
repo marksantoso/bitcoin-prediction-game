@@ -1,6 +1,6 @@
 # IAM role for Lambda function
 resource "aws_iam_role" "lambda_execution_role" {
-  name = "${var.project_name}-lambda-role-${random_string.suffix.result}"
+  name = "${var.project_name}-lambda-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -17,6 +17,7 @@ resource "aws_iam_role" "lambda_execution_role" {
 
   tags = {
     Name = "${var.project_name}-lambda-role"
+    Environment = var.environment
   }
 }
 
@@ -28,7 +29,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 
 # IAM policy for DynamoDB access
 resource "aws_iam_policy" "lambda_dynamodb_policy" {
-  name = "${var.project_name}-lambda-dynamodb-policy-${random_string.suffix.result}"
+  name = "${var.project_name}-lambda-dynamodb-policy"
   path = "/"
   description = "IAM policy for DynamoDB access from Lambda"
 

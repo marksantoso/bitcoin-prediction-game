@@ -9,14 +9,6 @@
 	will-change: width;
 }
 
-.progressBarUp {
-	background-color: var(--color-success);
-}
-
-.progressBarDown {
-	background-color: var(--color-error);
-}
-
 .startingPrice {
 	font-size: var(--text-sm);
 	color: var(--color-background-primary);
@@ -31,6 +23,14 @@
 	min-height: var(--space-10);
 	display: flex;
 	align-items: center;
+}
+
+.progressBarUp {
+	background-color: var(--color-success);
+}
+
+.progressBarDown {
+	background-color: var(--color-error);
 }
 
 .startingPrice.completed {

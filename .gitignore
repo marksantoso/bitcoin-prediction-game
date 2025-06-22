@@ -50,6 +50,7 @@ next-env.d.ts
 terraform.log
 
 # AWS
+lambda/node_modules/
 lambda-packages/
 *.zip
 deploy.log

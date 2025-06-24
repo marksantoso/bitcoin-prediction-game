@@ -3,7 +3,7 @@ import BitcoinPriceCard from './BitcoinPriceCard/BitcoinPriceCard'
 import UserScoreCard from './UserScoreCard/UserScoreCard'
 import { useBitcoinPrice } from '@/hooks/bitcoin/useBitcoinData'
 import { useUserScore } from '@/hooks/bitcoin/useUserScore'
-import { useBitcoinUtils } from '@/hooks/bitcoin/useBitcoinUtils'
+import { formatPrice } from '@/utils/formatPrice';
 import styles from './PriceScoreGrid.module.css'
 
 interface PriceScoreGridProps {
@@ -13,7 +13,6 @@ interface PriceScoreGridProps {
 export default function PriceScoreGrid({ userId }: PriceScoreGridProps) {
   const { data: bitcoinPrice, isLoading: priceLoading, error: priceError } = useBitcoinPrice()
   const { data: userScore, isLoading: scoreLoading, error: scoreError } = useUserScore(userId || '')
-  const { formatPrice } = useBitcoinUtils()
 
   return (
     <div className={styles.priceScoreGrid}>

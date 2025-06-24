@@ -6,4 +6,4 @@ export const queryKeys = {
     userScore: (userId: string) => ['bitcoin', 'userScore', userId] as const,
     activeGuess: (userId: string) => ['bitcoin', 'activeGuess', userId] as const,
   },
-} as const 
+} as const

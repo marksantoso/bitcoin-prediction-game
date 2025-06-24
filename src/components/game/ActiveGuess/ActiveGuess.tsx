@@ -1,7 +1,8 @@
 "use client"
 import { useRef, useEffect, useState, useCallback, useMemo } from "react"
 import { Card, CardContent } from "@/ui"
-import { useBitcoinUtils } from "@/hooks/bitcoin/useBitcoinUtils"
+import { formatTime } from "@/utils/formatTime"
+import { formatPrice } from "@/utils/formatPrice"
 import { useResolveGuess } from "@/hooks/bitcoin/useBitcoinData"
 import { IGuess, IBitcoinPrice } from "@/types/bitcoin.dto"
 import GuessHeader from "./GuessHeader/GuessHeader"
@@ -20,7 +21,6 @@ export default function ActiveGuessDisplay({
   currentPrice,
   userId
 }: ActiveGuessDisplayProps) {
-  const { formatTime, formatPrice } = useBitcoinUtils()
   const [remainingMs, setRemainingMs] = useState<number>(60)
   const [progressWidth, setProgressWidth] = useState<number>(0)
   const [predictionStatus, setPredictionStatus] = useState<string | null>(null)

@@ -1,16 +1,11 @@
 import { render, screen, act } from '../../../../test-utils/setup';
 import ActiveGuessDisplay from '../ActiveGuess';
 import { useResolveGuess } from '@/hooks/bitcoin/useBitcoinData';
-import { useBitcoinUtils } from '@/hooks/bitcoin/useBitcoinUtils';
 import { IGuess } from '@/types/bitcoin.dto';
 
 // Mock the hooks
 jest.mock('@/hooks/bitcoin/useBitcoinData', () => ({
   useResolveGuess: jest.fn()
-}));
-
-jest.mock('@/hooks/bitcoin/useBitcoinUtils', () => ({
-  useBitcoinUtils: jest.fn()
 }));
 
 describe('ActiveGuess', () => {
@@ -37,11 +32,6 @@ describe('ActiveGuess', () => {
     (useResolveGuess as jest.Mock).mockReturnValue({
       mutate: jest.fn(),
       isPending: false
-    });
-
-    (useBitcoinUtils as jest.Mock).mockReturnValue({
-      formatTime: (ms: number) => `${Math.ceil(ms / 1000)}s`,
-      formatPrice: (price: number) => `$${price.toLocaleString()}`
     });
 
     // Mock requestAnimationFrame

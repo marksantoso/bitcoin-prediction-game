@@ -2,7 +2,6 @@ import { render, screen } from '../../../../test-utils/setup';
 import PriceScoreGrid from '../PriceScoreGrid';
 import { useBitcoinPrice } from '@/hooks/bitcoin/useBitcoinData';
 import { useUserScore } from '@/hooks/bitcoin/useUserScore';
-import { useBitcoinUtils } from '@/hooks/bitcoin/useBitcoinUtils';
 
 // Mock the hooks
 jest.mock('@/hooks/bitcoin/useBitcoinData', () => ({
@@ -11,10 +10,6 @@ jest.mock('@/hooks/bitcoin/useBitcoinData', () => ({
 
 jest.mock('@/hooks/bitcoin/useUserScore', () => ({
   useUserScore: jest.fn()
-}));
-
-jest.mock('@/hooks/bitcoin/useBitcoinUtils', () => ({
-  useBitcoinUtils: jest.fn()
 }));
 
 describe('PriceScoreGrid', () => {
@@ -32,11 +27,6 @@ describe('PriceScoreGrid', () => {
   };
 
   beforeEach(() => {
-    // Mock formatPrice function
-    (useBitcoinUtils as jest.Mock).mockReturnValue({
-      formatPrice: (price: number) => `$${price.toLocaleString()}`
-    });
-
     // Mock price and score hooks
     (useBitcoinPrice as jest.Mock).mockReturnValue({
       data: mockPrice,

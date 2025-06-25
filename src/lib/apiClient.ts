@@ -54,6 +54,7 @@ export class ApiClient {
                                 const response = await fetch(url, {
                                         ...options,
                                         signal,
+                                        cache: 'no-store',
                                         headers: {
                                                 'Content-Type': 'application/json',
                                                 ...options.headers,

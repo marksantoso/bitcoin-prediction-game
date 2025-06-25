@@ -4,23 +4,20 @@ export function createQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        // How long to cache data
-        gcTime: 1000 * 60 * 60 * 24, // 24 hours
-        // How long data is considered fresh
-        staleTime: 1000 * 60 * 5, // 5 minutes for most data
-        // Retry failed requests
+        // Always treat data as stale
+        staleTime: 0,
+        // Always refetch on mount
+        refetchOnMount: true,
+        // Always refetch on window focus
+        refetchOnWindowFocus: true,
+        // Always refetch on reconnect
+        refetchOnReconnect: true,
         retry: (failureCount, error: any) => {
-          // Don't retry 4xx errors
           if (error?.status >= 400 && error?.status < 500) {
             return false
           }
-          // Retry up to 3 times for other errors
           return failureCount < 3
         },
-        // Refetch when window regains focus
-        refetchOnWindowFocus: true,
-        // Refetch when reconnecting
-        refetchOnReconnect: true,
       },
       mutations: {
         // Retry mutations once

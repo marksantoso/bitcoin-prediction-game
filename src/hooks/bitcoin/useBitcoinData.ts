@@ -37,7 +37,6 @@ export function useBitcoinPrice() {
     },
     // Reduced polling interval since we're using WebSocket
     refetchInterval: GAME_CONFIG.priceUpdateInterval * 2, // Fallback polling every 20 seconds
-    staleTime: 1000 * 30, // Data is fresh for 30 seconds
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     retry: (failureCount, error) => {
@@ -69,8 +68,6 @@ export function useActiveGuess(userId: string) {
       }
     },
     enabled: !!userId,
-    staleTime: 1000 * 10, // Data is fresh for 10 seconds
-    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
     refetchInterval: (data) => {
       // Only refetch if there's an active guess
       return data ? 1000 * 5 : false // Every 5 seconds if active guess exists

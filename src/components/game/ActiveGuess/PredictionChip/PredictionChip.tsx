@@ -1,4 +1,3 @@
-import { memo, useMemo } from "react"
 import { TrendingUp, TrendingDown } from "lucide-react"
 import { Chip } from '@/ui'
 import styles from "./PredictionChip.module.css"
@@ -9,12 +8,7 @@ interface PredictionChipProps {
 
 function PredictionChip({ direction }: PredictionChipProps) {
 	const Icon = direction === 'up' ? TrendingUp : TrendingDown
-
-	function getChipClassNames() {
-		return `${styles.predictionChip} ${direction === "up" ? styles.predictionChipDown : styles.predictionChipUp}`
-	}
-
-	const chipClassNames = useMemo(getChipClassNames, [direction])
+	const chipClassNames = `${styles.predictionChip} ${direction === "up" ? styles.predictionChipDown : styles.predictionChipUp}`
 
 	return (
 		<Chip
@@ -30,6 +24,4 @@ function PredictionChip({ direction }: PredictionChipProps) {
 	)
 }
 
-const MemoizedPredictionChip = memo(PredictionChip)
-
-export default MemoizedPredictionChip
+export default PredictionChip

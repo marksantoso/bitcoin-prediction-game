@@ -1,8 +1,9 @@
 "use client"
-import { useRef, useEffect, useState, useCallback, useMemo } from "react"
+import { useRef, useEffect, useState, useCallback } from "react"
 import { Card, CardContent } from "@/ui"
 import { formatTime } from "@/utils/formatTime"
 import { formatPrice } from "@/utils/formatPrice"
+import { GAME_CONFIG } from "@/config/game"
 import { useResolveGuess } from "@/hooks/bitcoin/useBitcoinData"
 import { IGuess, IBitcoinPrice } from "@/types/bitcoin.dto"
 import GuessHeader from "./GuessHeader/GuessHeader"
@@ -38,7 +39,6 @@ export default function ActiveGuessDisplay({
     const priceIsHigher = currentPrice.price > activeGuess.startPrice
     const predictedUp = activeGuess.direction === "up"
 
-    // If prediction matches the price movement, it's correct
     setPredictionStatus(priceIsHigher === predictedUp ? "correct" : "incorrect")
   }
 
@@ -49,13 +49,10 @@ export default function ActiveGuessDisplay({
     const currentTimeMs = Date.now()
     const remaining = Math.max(0, expiresAtMs - currentTimeMs)
     setRemainingMs(remaining)
-
-    const progress = (remaining / 60000) * 100
+    const progress = (remaining / GAME_CONFIG.guessInterval) * 100
     setProgressWidth(Math.min(100, Math.max(0, progress)))
 
-    if (timeRemainingRef.current) {
-      timeRemainingRef.current.textContent = formatTime(remaining)
-    }
+    if (timeRemainingRef.current) timeRemainingRef.current.textContent = formatTime(remaining)
 
     if (remaining <= 0 && !activeGuess.resolved && !hasStartedResolvingRef.current && currentPrice && (currentPrice.price !== activeGuess.startPrice)) {
       hasStartedResolvingRef.current = true
@@ -106,9 +103,7 @@ export default function ActiveGuessDisplay({
     getPredictionStatus()
   }, [currentPrice, activeGuess.startPrice, activeGuess.direction])
 
-  const showWaitingMessage = useMemo(() => {
-    return (currentPrice?.price == activeGuess.startPrice) && (remainingMs == 0)
-  }, [currentPrice?.price, activeGuess.startPrice, remainingMs])
+  const showWaitingMessage = (currentPrice?.price == activeGuess.startPrice) && (remainingMs == 0)
 
   return (
     <Card className={styles.activeGuessCard}>

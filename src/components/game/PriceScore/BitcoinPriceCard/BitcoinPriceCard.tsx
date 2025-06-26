@@ -1,27 +1,13 @@
-import { useMemo } from 'react'
 import { Card, CardContent } from '@/ui'
 import { TrendingUp } from 'lucide-react'
 import { Typography, Box, CircularProgress } from '@mui/material'
-import { IBitcoinPrice } from '@/types/bitcoin.dto'
 import styles from './BitcoinPriceCard.module.css'
+import { useBitcoinPrice } from '@/hooks/bitcoin/useBitcoinData'
+import { formatPrice } from '@/utils/formatPrice';
 
-interface BitcoinPriceCardProps {
-    bitcoinPrice: IBitcoinPrice | undefined
-    isLoading: boolean
-    error: Error | null
-    formatPrice: (price: number) => string
-}
-
-const BitcoinPriceCard = ({
-    bitcoinPrice,
-    isLoading,
-    error,
-    formatPrice
-}: BitcoinPriceCardProps) => {
-    const formattedPrice = useMemo(() => {
-        if (!bitcoinPrice) return null
-        return formatPrice(bitcoinPrice.price)
-    }, [bitcoinPrice, formatPrice])
+const BitcoinPriceCard = () => {
+    const { data: bitcoinPrice, isLoading, error } = useBitcoinPrice()
+    const price = formatPrice(bitcoinPrice?.price || 0)
 
     return (
         <Card className={styles.card} padding='small'>
@@ -52,7 +38,7 @@ const BitcoinPriceCard = ({
                 ) : bitcoinPrice ? (
                     <div>
                         <div className={styles.priceValue} data-testid="current-price">
-                            {formattedPrice}
+                            {price}
                         </div>
                         <div className={styles.loadingIndicator}>
                             BTC/USD • Live Price

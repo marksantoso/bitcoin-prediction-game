@@ -1,22 +1,15 @@
 
-import { memo, useMemo } from 'react'
-import { IUserScore } from '@/types/bitcoin.dto'
 import { Card, CardContent } from '@/ui'
 import { Award } from 'lucide-react'
 import { Typography, Box, CircularProgress } from '@mui/material'
+import { useUserScore } from '@/hooks/bitcoin/useUserScore'
 import styles from './UserScoreCard.module.css'
 
-interface UserScoreCardProps {
-    userScore: IUserScore | undefined
-    isLoading: boolean
-    error: Error | null
-}
+function UserScoreCard({ userId }: {userId: string}) {
+    const { data: userScore, isLoading, error } = useUserScore(userId)
 
-function UserScoreCard({ userScore, isLoading, error }: UserScoreCardProps) {
-    const scoreValue = useMemo(() => userScore?.score || 0, [userScore?.score])
-    const scoreClass = useMemo(() => {
-        return `${styles.scoreValue} ${scoreValue > 0 ? styles.scorePositive : styles.scoreNegative}`
-    }, [scoreValue])
+    const scoreValue = userScore?.score || 0
+    const scoreClass = `${styles.scoreValue} ${scoreValue > 0 ? styles.scorePositive : styles.scoreNegative}`
 
     return (
         <Card className={styles.card} padding='small'>
@@ -58,5 +51,4 @@ function UserScoreCard({ userScore, isLoading, error }: UserScoreCardProps) {
     )
 }
 
-const MemoizedUserScoreCard = memo(UserScoreCard)
-export default MemoizedUserScoreCard
+export default UserScoreCard

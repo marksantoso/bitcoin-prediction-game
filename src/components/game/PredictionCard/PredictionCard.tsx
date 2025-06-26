@@ -1,11 +1,12 @@
 "use client"
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent } from '@/ui'
 import { useMakeGuess } from "@/hooks/bitcoin/useBitcoinData"
 import { IBitcoinPrice } from "@/types/bitcoin.dto"
 import PredictionButton from "./PredictionButton/PredictionButton"
-import MemoizedPredictionCardHeader from "./PredictionHeader/PredictionHeader"
+import PredictionCardHeader from "./PredictionHeader/PredictionHeader"
 import styles from "./PredictionCard.module.css"
+import { GuessDirection } from '@/config/game'
 
 interface PredictionCardProps {
   currentPrice: IBitcoinPrice | undefined
@@ -18,7 +19,7 @@ export default function PredictionCard({
   userId,
   isLoading
 }: PredictionCardProps) {
-  const [direction, setDirection] = useState<'up' | 'down' | null>(null)
+  const [direction, setDirection] = useState<GuessDirection | null>(null)
   const [isOffline, setIsOffline] = useState(false)
   const makeGuessMutation = useMakeGuess()
 
@@ -36,7 +37,7 @@ export default function PredictionCard({
     }
   }, [])
 
-  const handleMakeGuess = useCallback(async (guessDirection: 'up' | 'down') => {
+  const handleMakeGuess = useCallback(async (guessDirection: GuessDirection) => {
     if (!currentPrice?.price || !userId || isOffline) return
 
     try {
@@ -51,15 +52,11 @@ export default function PredictionCard({
     }
   }, [currentPrice?.price, userId, makeGuessMutation, isOffline])
 
-  function checkIsDisabled() {
-    return isLoading || !currentPrice || !userId || makeGuessMutation.isPending || isOffline
-  }
-
-  const isDisabled = useMemo(checkIsDisabled, [isLoading, currentPrice, userId, makeGuessMutation.isPending, isOffline])
+  const isDisabled = isLoading || !currentPrice || !userId || makeGuessMutation.isPending || isOffline
   
   return (
     <Card className={styles.predictionCard}>
-      <MemoizedPredictionCardHeader isOffline={isOffline} />
+      <PredictionCardHeader isOffline={isOffline} />
       <CardContent>
         <div className={styles.predictionButtons}>
           <PredictionButton

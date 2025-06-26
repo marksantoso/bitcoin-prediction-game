@@ -1,6 +1,5 @@
 
 import { TrendingUp, TrendingDown } from "lucide-react"
-import { useMemo } from "react"
 import { Button } from "@/ui"
 
 import styles from "./PredictionButton.module.css"
@@ -28,10 +27,6 @@ const PredictionButton = ({
 }: PredictionButtonProps) => {
     const Icon = direction === 'up' ? TrendingUp : TrendingDown
 
-    const getButtonClassNames = () => {
-        return `${styles.predictionButton} ${direction === 'up' ? styles.upButton : styles.downButton}`
-    }
-
     const getButtonLabel = () => {
         if (isOffline) {
             return 'Offline - Check connection'
@@ -42,8 +37,8 @@ const PredictionButton = ({
         return `Price will go ${direction.toUpperCase()}`
     }
 
-    const buttonClassNames = useMemo(getButtonClassNames, [direction])
-    const label = useMemo(getButtonLabel, [direction, error, isOffline])
+    const buttonClassNames = `${styles.predictionButton} ${direction === 'up' ? styles.upButton : styles.downButton}`
+    const label = getButtonLabel()
 
     return (
         <Button

@@ -1,4 +1,3 @@
-import { memo } from "react"
 import { CardHeader } from '@/ui'
 import { Clock } from "lucide-react"
 import styles from "./GuessHeader.module.css"
@@ -22,5 +21,4 @@ function GuessHeader({ isResolving }: HeaderProps) {
 	)
 }
 
-const MemoizedGuessHeader = memo(GuessHeader)
-export default MemoizedGuessHeader
+export default GuessHeader

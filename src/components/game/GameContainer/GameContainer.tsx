@@ -9,7 +9,6 @@ import PredictionCard from "@/components/game/PredictionCard/PredictionCard"
 import styles from "./GameContainer.module.css"
 
 export default function GameContainer({ userId }: { userId: string }) {
-  // TanStack Query hooks
   const {
     data: currentPrice,
     isLoading: isPriceLoading,
@@ -25,8 +24,8 @@ export default function GameContainer({ userId }: { userId: string }) {
   // Combine all loading states
   const isLoading = isPriceLoading || isGuessLoading || makeGuessMutation.isPending
 
-  // Show loading state if user ID is still being generated
-  if ((isPriceLoading && !currentPrice)) {
+  // Show loading state if price is still loading
+  if ((isPriceLoading && !currentPrice && !userId)) {
     return (
       <div className={styles.loadingContainer}>
         <Card className={styles.loadingCard}>
@@ -69,13 +68,13 @@ export default function GameContainer({ userId }: { userId: string }) {
         />
       </div>
       <div className={styles.gameContainer}>
-        {userId && <PriceScoreGrid userId={userId} />}
+        <PriceScoreGrid userId={userId} />
 
         {activeGuess && (
           <ActiveGuessDisplay
             activeGuess={activeGuess}
             currentPrice={currentPrice}
-            userId={userId || ''}
+            userId={userId}
           />
         )}
 
@@ -89,4 +88,4 @@ export default function GameContainer({ userId }: { userId: string }) {
       </div>
     </div >
   )
-} 
+}

@@ -1,4 +1,3 @@
-import { memo } from "react"
 import { CardHeader } from "@/ui"
 import { WifiOff } from "lucide-react"
 import styles from "./PredictionHeader.module.css"
@@ -17,5 +16,4 @@ function PredictionCardHeader({ isOffline }: { isOffline?: boolean }) {
     )
   }
   
-  const MemoizedPredictionCardHeader = memo(PredictionCardHeader)
-  export default MemoizedPredictionCardHeader
+export default PredictionCardHeader

@@ -1,4 +1,3 @@
-import { useMemo } from "react"
 import styles from "./ProgressBar.module.css"
 
 interface ProgressBarProps {
@@ -17,12 +16,8 @@ const ProgressBar = ({
 	predictionStatus,
 	formatPrice
 }: ProgressBarProps) => {
-
-	const barClassNames = useMemo(() => {
-		return `${styles.startingPrice} ${(currentPrice ?? 0) > startPrice ? styles.progressBarUp : ''} ${(currentPrice ?? 0) < startPrice ? styles.progressBarDown : ''} `
-	}, [currentPrice, startPrice])
-
-	const formattedPrice = useMemo(() => formatPrice(startPrice), [formatPrice, startPrice])
+	const barClassNames = `${styles.startingPrice} ${(currentPrice ?? 0) > startPrice ? styles.progressBarUp : ''} ${(currentPrice ?? 0) < startPrice ? styles.progressBarDown : ''} `
+	const formattedPrice = formatPrice(startPrice)
 
 	return (
 		<div className={barClassNames}>
